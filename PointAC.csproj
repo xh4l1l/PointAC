@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+    <NoWarn>WPF0001</NoWarn>
+    <Nullable>enable</Nullable>
+    <OutputType>WinExe</OutputType>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <Company>Kh4l1l</Company>
+    <Authors>Kh4l1l</Authors>
+    <Product>Point Auto Clicker</Product>
+    <ApplicationIcon>Assets/Favicon.ico</ApplicationIcon>
+    <Copyright>© 2025 Kh4l1l. All rights reserved.</Copyright>
+    <Description>Automated mouse clicker tool with configurable click points.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\App.png" />
+    <None Remove="Assets\Favicon.ico" />
+    <None Remove="Assets\Icons\1024px.png" />
+    <None Remove="Assets\Icons\128px.png" />
+    <None Remove="Assets\Icons\16px.png" />
+    <None Remove="Assets\Icons\2048px.png" />
+    <None Remove="Assets\Icons\256px.png" />
+    <None Remove="Assets\Icons\32px.png" />
+    <None Remove="Assets\Icons\512px.png" />
+    <None Remove="Assets\Icons\64px.png" />
+    <None Remove="Assets\Target.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Favicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\1024px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\128px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\16px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\2048px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\256px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\32px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\512px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Icons\64px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Target.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="SharpDX" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+    <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.10" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+</Project>

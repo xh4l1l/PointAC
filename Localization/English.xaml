@@ -1,0 +1,116 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Application -->
+    <sys:String x:Key="AppName">Point Auto Clicker</sys:String>
+    <sys:String x:Key="AppTitle">Point Auto Clicker</sys:String>
+    <sys:String x:Key="AppCopyright">Developed by Kh4l1l (@xh4l1l)</sys:String>
+
+    <!-- Buttons Tooltips -->
+    <sys:String x:Key="ToggleButtonTooltip">Toggle</sys:String>
+    <sys:String x:Key="LoopedButtonTooltip">Looped</sys:String>
+    <sys:String x:Key="AddButtonTooltip">Add Point(s)</sys:String>
+    <sys:String x:Key="RemoveButtonTooltip">Remove Point(s)</sys:String>
+    <sys:String x:Key="ClearButtonTooltip">Clear Point(s)</sys:String>
+    <sys:String x:Key="SaveButtonTooltip">Save Point(s)</sys:String>
+    <sys:String x:Key="LoadButtonTooltip">Load Point(s)</sys:String>
+    <sys:String x:Key="SettingsButtonTooltip">Settings</sys:String>
+
+    <!-- General -->
+    <sys:String x:Key="GeneralOn">On</sys:String>
+    <sys:String x:Key="GeneralOff">Off</sys:String>
+    <sys:String x:Key="GeneralSystemSetting">Use system setting</sys:String>
+    <sys:String x:Key="GeneralMillisecondLabel">Millisecond(s)</sys:String>
+
+    <!-- Sections -->
+    <sys:String x:Key="SettingsTitle">Settings</sys:String>
+    <sys:String x:Key="SettingsSectionPoints">Points</sys:String>
+    <sys:String x:Key="SettingsSectionGeneral">General</sys:String>
+    <sys:String x:Key="SettingsAboutTitle">About</sys:String>
+
+    <!-- Global Duration -->
+    <sys:String x:Key="SettingsGlobalDurationTitle">Global Duration</sys:String>
+    <sys:String x:Key="SettingsGlobalDurationDescription">The duration of newly created points</sys:String>
+
+    <!-- Global Click Type -->
+    <sys:String x:Key="SettingsClickTypeTitle">Global Click Type</sys:String>
+    <sys:String x:Key="SettingsClickTypeDescription">The click type of newly created points</sys:String>
+
+    <!-- Global Mouse Button -->
+    <sys:String x:Key="SettingsGlobalMouseButtonTitle">Global Mouse Button</sys:String>
+    <sys:String x:Key="SettingsGlobalMouseButtonDescription">The mouse button of newly created points</sys:String>
+
+    <!-- Toggle Hotkey -->
+    <sys:String x:Key="SettingsToggleHotkeyTitle">Toggle Hotkey</sys:String>
+    <sys:String x:Key="SettingsToggleHotkeyDescription">The hotkey used to start or stop Auto Clicking.</sys:String>
+    <sys:String x:Key="HotkeyChangeTooltip">Press a key or key combination to change the hotkey.</sys:String>
+
+    <!-- Loop Count -->
+    <sys:String x:Key="SettingsLoopCountTitle">Loop Count</sys:String>
+    <sys:String x:Key="SettingsLoopCountDescription">Set to 0 for Infinite Loop</sys:String>
+
+    <!-- Menu Dock -->
+    <sys:String x:Key="SettingsMenuDockTitle">Menu Dock</sys:String>
+    <sys:String x:Key="SettingsMenuDockDescription">Changes the menu placement</sys:String>
+
+    <!-- Always on Top -->
+    <sys:String x:Key="SettingsAlwaysOnTopTitle">Always on Top</sys:String>
+    <sys:String x:Key="SettingsAlwaysOnTopDescription">Keeps this window always above others</sys:String>
+
+    <!-- App Theme -->
+    <sys:String x:Key="SettingsAppThemeTitle">App Theme</sys:String>
+    <sys:String x:Key="SettingsAppThemeDescription">Select which app theme to display</sys:String>
+
+    <!-- AppLanguage -->
+    <sys:String x:Key="SettingsAppLanguageTitle">App Language</sys:String>
+    <sys:String x:Key="SettingsAppLanguageDescription">Select which language the app will be displayed in</sys:String>
+
+    <!-- Updates -->
+    <sys:String x:Key="UpdateError">Failed to check for updates.</sys:String>
+    <sys:String x:Key="UpdateAvailable">A new version is available!</sys:String>
+    <sys:String x:Key="UpdateUpToDate">You're using the latest version.</sys:String>
+    <sys:String x:Key="CurrentlyCheckingForUpdates">Searching for updates...</sys:String>
+
+    <!-- Check For Update -->
+    <sys:String x:Key="SettingsCheckForUpdatesTitle">Check For Updates</sys:String>
+    <sys:String x:Key="SettingsCheckForUpdateButtonCheck">Check</sys:String>
+    <sys:String x:Key="SettingsCheckForUpdateButtonUpdate">Update</sys:String>
+
+    <!-- Mouse Buttons -->
+    <sys:String x:Key="MouseButtonLeft">Left</sys:String>
+    <sys:String x:Key="MouseButtonRight">Right</sys:String>
+    <sys:String x:Key="MouseButtonMiddle">Middle</sys:String>
+
+    <!-- Click Types -->
+    <sys:String x:Key="ClickTypeSingle">Single</sys:String>
+    <sys:String x:Key="ClickTypeDouble">Double</sys:String>
+
+    <!-- Menu Dock options -->
+    <sys:String x:Key="MenuDockTop">Top</sys:String>
+    <sys:String x:Key="MenuDockLeft">Left</sys:String>
+
+    <!-- Theme options -->
+    <sys:String x:Key="ThemeDark">Dark</sys:String>
+    <sys:String x:Key="ThemeLight">Light</sys:String>
+
+    <!-- Points View -->
+    <sys:String x:Key="PointsEmptyTitle">No available points</sys:String>
+    <sys:String x:Key="PointsEmptyDescription">Add points or Drag and Drop .PAC file(s) to load.</sys:String>
+
+    <!-- Point Settings -->
+    <sys:String x:Key="PointOrderLabel">Order</sys:String>
+    <sys:String x:Key="PointDurationLabel">Duration</sys:String>
+    <sys:String x:Key="PointPositionLabel">Position</sys:String>
+
+    <!-- Point Data -->
+    <sys:String x:Key="PointPositionXLabel">X</sys:String>
+    <sys:String x:Key="PointPositionYLabel">Y</sys:String>
+
+    <!-- Socials -->
+    <sys:String x:Key="SocialLinksHeader">Social Links</sys:String>
+    <sys:String x:Key="GithubInviteDescription">Follow me on Github!</sys:String>
+    <sys:String x:Key="YoutubeInviteDescription">Subscribe to my Youtube Channel!</sys:String>
+    <sys:String x:Key="DiscordInviteDescription">Join my Discord Community for updates and more!</sys:String>
+    
+</ResourceDictionary>

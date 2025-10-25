@@ -1,0 +1,1243 @@
+﻿<Window x:Class="PointAC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PointAC"
+        mc:Ignorable="d"
+        Title="{DynamicResource AppTitle}"
+        Height="450"
+        Width="550"
+        MinHeight="400"
+        MinWidth="510"
+        ThemeMode="System"
+        Topmost="True"
+        Closed="Window_Closed"
+        Loaded="Window_Loaded"
+        AllowDrop="True"
+        DragOver="Window_DragOver"
+        Drop="Window_Drop"
+        StateChanged="Window_StateChanged"
+        SizeChanged="Window_SizeChanged"
+        LocationChanged="Window_LocationChanged">
+
+    <Window.Resources>
+        <local:IntSafeConverter x:Key="IntSafeConverter" />
+
+        <Style x:Key="HyperlinkStyle"
+               TargetType="Hyperlink"
+               BasedOn="{StaticResource {x:Type Hyperlink}}">
+            <Setter Property="TextDecorations"
+                    Value="{x:Null}" />
+
+            <Setter Property="Foreground"
+                    Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                         Value="True">
+                    <Setter Property="TextDecorations"
+                            Value="Underline" />
+
+                    <Setter Property="Foreground"
+                            Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MenuStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Margin"
+                    Value="2" />
+            <Setter Property="FontSize"
+                    Value="16" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="Transparent" />
+            <Setter Property="FontFamily"
+                    Value="{StaticResource SymbolThemeFontFamily}" />
+        </Style>
+
+        <Style x:Key="ComboBoxItem"
+               TargetType="ComboBoxItem"
+               BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+            <EventSetter Event="RequestBringIntoView"
+                         Handler="ComboBox_RequestBringIntoView" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Name="MenuGrid"
+              Grid.Row="0"
+              Grid.Column="1"
+              Margin="4">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Name="ActionsPanel"
+                        Orientation="Horizontal"
+                        Background="Transparent"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Margin="0">
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE768;"
+                        Name="ToggleButton"
+                        Click="ToggleButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource ToggleButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Separator Margin="2" />
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE8EE;"
+                        Name="LoopButton"
+                        Click="LoopButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource LoopedButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Separator Margin="2" />
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xECC8;"
+                        Name="AddButton"
+                        Click="AddButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource AddButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE74D;"
+                        Name="RemoveButton"
+                        Click="RemoveButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource RemoveButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE72C;"
+                        Name="ClearButton"
+                        Click="ClearButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource ClearButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Separator Margin="2" />
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE74E;"
+                        Name="SaveButton"
+                        Click="SaveButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource SaveButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE8E5;"
+                        Name="LoadButton"
+                        Click="LoadButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource LoadButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+
+                <Separator Margin="2" />
+            </StackPanel>
+
+            <StackPanel Name="MiscPanel"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Background="Transparent"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <Button Style="{StaticResource MenuStyle}"
+                        Content="&#xE713;"
+                        Name="SettingsButton"
+                        Click="SettingsButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip FontFamily="Segoe UI"
+                                 Placement="Mouse"
+                                 HasDropShadow="True">
+                            <TextBlock Text="{DynamicResource SettingsButtonTooltip}"
+                                       Margin="4,2,4,2" />
+                        </ToolTip>
+                    </Button.ToolTip>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Settings Container -->
+        <Border Name="SettingsContainer"
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="4,0,4,4"
+                CornerRadius="6"
+                Visibility="Collapsed">
+
+            <ScrollViewer Name="SettingsScrollViewer"
+                          VerticalScrollBarVisibility="Auto">
+
+                <StackPanel Margin="24"
+                            Orientation="Vertical">
+
+                    <!-- Settings Title -->
+                    <TextBlock Text="{DynamicResource SettingsTitle}"
+                               Style="{StaticResource TitleTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               Margin="0,0,0,20" />
+
+                    <!-- Points Section -->
+                    <TextBlock Text="{DynamicResource SettingsSectionPoints}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               Margin="0,0,0,8"
+                               FontWeight="SemiBold" />
+
+                    <!-- Global Duration -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE7C9;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsGlobalDurationTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsGlobalDurationDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <TextBox Grid.Column="2"
+                                     Name="GlobalDurationTextBox"
+                                     Width="175"
+                                     Text="1000"
+                                     Tag="DurationTextBox"
+                                     LostFocus="IntegerBox_LostFocus"
+                                     PreviewTextInput="IntegerBox_PreviewTextInput"
+                                     KeyDown="IntegerBox_KeyDown"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Global Click Type -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE962;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsClickTypeTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsClickTypeDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="ClickTypeSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="1"
+                                      SelectionChanged="ClickTypeSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource ClickTypeSingle}"
+                                              Tag="Single" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource ClickTypeDouble}"
+                                              Tag="Double" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Global Mouse Button -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE962;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsGlobalMouseButtonTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsGlobalMouseButtonDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="MouseButtonSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="3"
+                                      SelectionChanged="MouseButtonSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource MouseButtonLeft}"
+                                              Tag="Left" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource MouseButtonRight}"
+                                              Tag="Right" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource MouseButtonMiddle}"
+                                              Tag="Middle" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralSystemSetting}"
+                                              Tag="System" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- General Section -->
+                    <TextBlock Text="{DynamicResource SettingsSectionGeneral}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               Margin="0,0,0,8"
+                               FontWeight="SemiBold" />
+
+                    <!-- Loop Count -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE8ED;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsLoopCountTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsLoopCountDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <TextBox Grid.Column="2"
+                                     Name="LoopCountTextBox"
+                                     Width="175"
+                                     Text="0"
+                                     LostFocus="LoopCountTextBox_LostFocus"
+                                     PreviewTextInput="IntegerBox_PreviewTextInput"
+                                     KeyDown="IntegerBox_KeyDown"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Hotkey -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xEDA7;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsToggleHotkeyTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsToggleHotkeyDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <Grid Name="HotkeyRegisterGrid"
+                                  Grid.Column="2"
+                                  Width="175"
+                                  MinHeight="32"
+                                  VerticalAlignment="Center"
+                                  HorizontalAlignment="Right"
+                                  ToolTip="{DynamicResource HotkeyChangeTooltip}"
+                                  MouseEnter="HotkeyRegisterGrid_MouseEnter"
+                                  MouseLeave="HotkeyRegisterGrid_MouseLeave">
+
+                                <Rectangle StrokeDashArray="8,8"
+                                           RadiusX="4"
+                                           RadiusY="4"
+                                           Height="Auto"
+                                           StrokeThickness="1"
+                                           VerticalAlignment="Stretch"
+                                           HorizontalAlignment="Stretch"
+                                           Stroke="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                           Fill="{DynamicResource ControlFillColorTransparentBrush}" />
+
+                                <TextBlock Name="HotkeyChangeHint"
+                                           FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                           FontSize="16"
+                                           Text="&#xE8B0;"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           HorizontalAlignment="Center" />
+
+                                <TextBlock Name="CurrentHotkeyButtons"
+                                           Text="F6"
+                                           Visibility="Collapsed"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Menu Dock Setting -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE90C;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsMenuDockTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsMenuDockTitle}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="MenuStyleSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="2"
+                                      SelectionChanged="MenuStyleSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource MenuDockTop}"
+                                              Tag="Top" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource MenuDockLeft}"
+                                              Tag="Left" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Always on Top -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xEB91;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsAlwaysOnTopTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsAlwaysOnTopDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="AlwaysOnTopSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="0"
+                                      SelectionChanged="AlwaysOnTopSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralOn}"
+                                              Tag="True" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralOff}"
+                                              Tag="False" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- App Theme -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE790;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsAppThemeTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsAppThemeDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="AppThemeSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="2"
+                                      SelectionChanged="AppThemeSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource ThemeDark}"
+                                              Tag="Dark" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource ThemeLight}"
+                                              Tag="Light" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralSystemSetting}"
+                                              Tag="System" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- App Language -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE775;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsAppLanguageTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsAppThemeDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="AppLanguageSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="2"
+                                      SelectionChanged="AppLanguageSelector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="العربية"
+                                              Tag="Arabic" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="English"
+                                              Tag="English" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralSystemSetting}"
+                                              Tag="System" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- About Section -->
+                    <TextBlock Text="{DynamicResource SettingsAboutTitle}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                               Margin="0,0,0,8"
+                               FontWeight="SemiBold" />
+
+                    <!-- Check For Updates -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xE895;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsCheckForUpdatesTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Name="CheckForUpdatesDescription"
+                                           Text="{DynamicResource UpdateUpToDate}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="2"
+                                    Width="175"
+                                    Name="CheckForUpdatesButton"
+                                    VerticalAlignment="Center"
+                                    Click="CheckForUpdatesButton_Click"
+                                    Style="{DynamicResource AccentButtonStyle}">
+                                <Grid>
+                                    <TextBlock x:Name="CheckForUpdatesButtonText"
+                                               Text="{DynamicResource SettingsCheckForUpdateButtonCheck}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+
+                                    <ProgressBar x:Name="CheckForUpdatesProgress"
+                                                 IsIndeterminate="True"
+                                                 Visibility="Collapsed"
+                                                 Height="4"
+                                                 VerticalAlignment="Bottom"
+                                                 Margin="0,0,0,4" />
+                                </Grid>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <Expander Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                              BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                              BorderThickness="1"
+                              Padding="12"
+                              Margin="0,0,0,8">
+
+                        <Expander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Image Source="/Assets/Icons/32px.png"
+                                       Width="32"
+                                       Height="32"
+                                       VerticalAlignment="Top"
+                                       Margin="0,0,12,0"
+                                       Stretch="UniformToFill" />
+
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{DynamicResource AppName}"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               FontSize="14" />
+                                    <TextBlock Text="{DynamicResource AppCopyright}"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Style="{StaticResource CaptionTextBlockStyle}"
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Static local:MainWindow.AppVersion}"
+                                           Margin="0,0,8,0"
+                                           Opacity="0.7" />
+                            </Grid>
+                        </Expander.Header>
+
+                        <!-- Expanded Content -->
+                        <Expander.Content>
+                            <StackPanel Margin="2">
+                                <!-- Header -->
+                                <TextBlock Text="{DynamicResource SocialLinksHeader}"
+                                           Style="{StaticResource SubtitleTextBlockStyle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           Margin="0,0,0,8" />
+
+                                <!-- GitHub -->
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0,2">
+        <Hyperlink Name="GithubHyperlink"
+                                    Style="{StaticResource HyperlinkStyle}"
+                                    Click="GithubHyperlink_Click">
+            <Run Text="{DynamicResource GithubInviteDescription}" />
+        </Hyperlink>
+                                </TextBlock>
+
+                                <!-- YouTube -->
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0,2">
+        <Hyperlink Name="YoutubeHyperlink"
+                                    Style="{StaticResource HyperlinkStyle}"
+                                    Click="YoutubeHyperlink_Click">
+            <Run Text="{DynamicResource YoutubeInviteDescription}" />
+        </Hyperlink>
+                                </TextBlock>
+
+                                <!-- Discord -->
+                                <TextBlock TextWrapping="Wrap"
+                                           Margin="0,2">
+        <Hyperlink Name="DiscordHyperlink"
+                                    Style="{StaticResource HyperlinkStyle}"
+                                    Click="DiscordHyperlink_Click">
+            <Run Text="{DynamicResource DiscordInviteDescription}" />
+        </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Expander.Content>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Border Name="PointsContainer"
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="4,0,4,4"
+                CornerRadius="6">
+
+            <ScrollViewer Name="PointsScrollViewer"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+
+                <DockPanel LastChildFill="True">
+                    <ItemsControl Name="PointsList"
+                                  Margin="8,0"
+                                  VerticalContentAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch">
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="HorizontalAlignment"
+                                        Value="Stretch" />
+                                <Setter Property="Margin"
+                                        Value="8,4" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasItems, RelativeSource={RelativeSource Self}}"
+                                                 Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ItemsControl">
+                                                    <StackPanel HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center">
+                                                        <TextBlock Text="{DynamicResource PointsEmptyTitle}"
+                                                                   Style="{StaticResource SubtitleTextBlockStyle}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontWeight="SemiBold"
+                                                                   Padding="4" />
+                                                        <TextBlock Text="{DynamicResource PointsEmptyDescription}"
+                                                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Padding="4" />
+                                                    </StackPanel>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:PointEntry}">
+                                <Grid>
+                                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                                            Padding="4"
+                                            CornerRadius="4"
+                                            BorderThickness="1"
+                                            SnapsToDevicePixels="True"
+                                            VerticalAlignment="Stretch"
+                                            HorizontalAlignment="Stretch">
+
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHovered}"
+                                                                 Value="True">
+                                                        <Setter Property="RenderTransformOrigin"
+                                                                Value="0.5,0.5" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <ScaleTransform ScaleX="0.95"
+                                                                                ScaleY="0.95" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Setter Property="BorderBrush"
+                                                                Value="{DynamicResource AccentFillColorSecondaryBrush}" />
+                                                    </DataTrigger>
+
+                                                    <DataTrigger Binding="{Binding IsRuntimeLocked}"
+                                                                 Value="True">
+                                                        <Setter Property="Opacity"
+                                                                Value="0.5" />
+                                                    </DataTrigger>
+
+                                                    <DataTrigger Binding="{Binding IsRuntimeLocked}"
+                                                                 Value="True">
+                                                        <Setter Property="Opacity"
+                                                                Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <!-- Your full existing StackPanel content -->
+                                        <StackPanel FlowDirection="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=FlowDirection}"
+                                                    VerticalAlignment="Center">
+                                            <!-- Order -->
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0,0,0,8">
+                                                <Viewbox Width="16"
+                                                         Height="16"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,4,0">
+                                                    <TextBlock Text="&#xE8FD;"
+                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                </Viewbox>
+
+                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{1}: {0}">
+                                                            <Binding Path="Order" />
+                                                            <Binding Source="{StaticResource PointOrderLabel}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Position -->
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0,0,0,8">
+                                                <Viewbox Width="16"
+                                                         Height="16"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,6,0">
+                                                    <TextBlock Text="&#xE707;"
+                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                </Viewbox>
+
+                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0}: {1}={2}, {3}={4}">
+                                                            <Binding Source="{StaticResource PointPositionLabel}" />
+                                                            <Binding Source="{StaticResource PointPositionXLabel}" />
+                                                            <Binding Path="Position.X" />
+                                                            <Binding Source="{StaticResource PointPositionYLabel}" />
+                                                            <Binding Path="Position.Y" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Duration -->
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0,0,0,6">
+                                                <Viewbox Width="16"
+                                                         Height="16"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,4,0">
+                                                    <TextBlock Text="&#xE917;"
+                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                </Viewbox>
+
+                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{1}: {0} {2}">
+                                                            <Binding Path="Duration" />
+                                                            <Binding Source="{StaticResource PointDurationLabel}" />
+                                                            <Binding Source="{StaticResource GeneralMillisecondLabel}" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Shared size scope for input fields -->
+                                            <StackPanel Grid.IsSharedSizeScope="False"
+                                                        VerticalAlignment="Stretch"
+                                                        HorizontalAlignment="Stretch">
+
+                                                <!-- Duration -->
+                                                <Grid Margin="0,0,0,8"
+                                                      HorizontalAlignment="Stretch">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="28" />
+                                                        <!-- icon -->
+                                                        <ColumnDefinition Width="*" />
+                                                        <!-- full stretch -->
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Viewbox Width="18"
+                                                             Height="18"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             Margin="0,0,8,0">
+                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                                   Text="&#xE823;" />
+                                                    </Viewbox>
+
+                                                    <TextBox Grid.Column="1"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Stretch"
+                                                             Margin="0"
+                                                             Padding="6,2"
+                                                             Text="{Binding Duration, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                             Tag="DurationTextBox"
+                                                             LostFocus="IntegerBox_LostFocus"
+                                                             PreviewTextInput="IntegerBox_PreviewTextInput"
+                                                             KeyDown="IntegerBox_KeyDown" />
+                                                </Grid>
+
+                                                <!-- Order -->
+                                                <Grid Margin="0,0,0,8"
+                                                      HorizontalAlignment="Stretch">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Viewbox Width="18"
+                                                             Height="18"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             Margin="0,0,8,0">
+                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                                   Text="&#xE8FD;" />
+                                                    </Viewbox>
+
+                                                    <TextBox Grid.Column="1"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Stretch"
+                                                             Margin="0"
+                                                             Padding="6,2"
+                                                             Text="{Binding Order, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                             Tag="OrderTextBox"
+                                                             PreviewTextInput="IntegerBox_PreviewTextInput"
+                                                             KeyDown="IntegerBox_KeyDown" />
+                                                </Grid>
+
+                                                <!-- Click Type -->
+                                                <Grid Margin="0,0,0,8"
+                                                      HorizontalAlignment="Stretch">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Viewbox Width="18"
+                                                             Height="18"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             Margin="0,0,8,0">
+                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text"
+                                                                            Value="&#xE8B0;" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ClickTypeString}"
+                                                                                     Value="Double">
+                                                                            <Setter Property="Text"
+                                                                                    Value="&#xE7C9;" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Viewbox>
+
+                                                    <ComboBox Grid.Column="1"
+                                                              VerticalAlignment="Center"
+                                                              HorizontalAlignment="Stretch"
+                                                              Margin="0"
+                                                              Padding="4,2"
+                                                              SelectedValue="{Binding ClickTypeString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectedValuePath="Tag">
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource ClickTypeSingle}"
+                                                                      Tag="Single" />
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource ClickTypeDouble}"
+                                                                      Tag="Double" />
+                                                    </ComboBox>
+                                                </Grid>
+
+                                                <!-- Mouse Button -->
+                                                <Grid Margin="0,0,0,8"
+                                                      HorizontalAlignment="Stretch">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Viewbox Width="18"
+                                                             Height="18"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             Margin="0,0,8,0">
+                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text"
+                                                                            Value="&#xE962;" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding ButtonString}"
+                                                                                     Value="Left">
+                                                                            <Setter Property="Text"
+                                                                                    Value="&#xE8E4;" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding ButtonString}"
+                                                                                     Value="Right">
+                                                                            <Setter Property="Text"
+                                                                                    Value="&#xE8E2;" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding ButtonString}"
+                                                                                     Value="Middle">
+                                                                            <Setter Property="Text"
+                                                                                    Value="&#xE8E3;" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding ButtonString}"
+                                                                                     Value="System">
+                                                                            <Setter Property="Text"
+                                                                                    Value="&#xE770;" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Viewbox>
+
+                                                    <ComboBox Grid.Column="1"
+                                                              VerticalAlignment="Center"
+                                                              HorizontalAlignment="Stretch"
+                                                              Margin="0"
+                                                              Padding="4,2"
+                                                              SelectedValue="{Binding ButtonString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectedValuePath="Tag">
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource MouseButtonLeft}"
+                                                                      Tag="Left" />
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource MouseButtonRight}"
+                                                                      Tag="Right" />
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource MouseButtonMiddle}"
+                                                                      Tag="Middle" />
+                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                      Content="{DynamicResource GeneralSystemSetting}"
+                                                                      Tag="Default" />
+                                                    </ComboBox>
+                                                </Grid>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

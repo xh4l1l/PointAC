@@ -1,0 +1,116 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- التطبيق -->
+    <sys:String x:Key="AppName">Point Auto Clicker</sys:String>
+    <sys:String x:Key="AppTitle">Point Auto Clicker</sys:String>
+    <sys:String x:Key="AppCopyright">تم التطوير بواسطة Kh4l1l (@xh4l1l)</sys:String>
+
+    <!-- تلميحات الأزرار -->
+    <sys:String x:Key="ToggleButtonTooltip">تشغيل/إيقاف</sys:String>
+    <sys:String x:Key="LoopedButtonTooltip">تكرار</sys:String>
+    <sys:String x:Key="AddButtonTooltip">إضافة نقطة</sys:String>
+    <sys:String x:Key="RemoveButtonTooltip">إزالة نقطة</sys:String>
+    <sys:String x:Key="ClearButtonTooltip">مسح النقاط</sys:String>
+    <sys:String x:Key="SaveButtonTooltip">حفظ النقاط</sys:String>
+    <sys:String x:Key="LoadButtonTooltip">تحميل النقاط</sys:String>
+    <sys:String x:Key="SettingsButtonTooltip">الإعدادات</sys:String>
+
+    <!-- عام -->
+    <sys:String x:Key="GeneralOn">تشغيل</sys:String>
+    <sys:String x:Key="GeneralOff">إيقاف</sys:String>
+    <sys:String x:Key="GeneralSystemSetting">استخدام إعداد النظام</sys:String>
+    <sys:String x:Key="GeneralMillisecondLabel">ملي ثانية</sys:String>
+
+    <!-- التحديثات -->
+    <sys:String x:Key="UpdateAvailable">إصدار جديد متوفر!</sys:String>
+    <sys:String x:Key="UpdateUpToDate">أنت تستخدم أحدث إصدار.</sys:String>
+    <sys:String x:Key="UpdateError">فشل في التحقق من وجود تحديثات.</sys:String>
+    <sys:String x:Key="CurrentlyCheckingForUpdates">يتم البحث عن تحديثات...</sys:String>
+
+    <!-- التحقق من التحديثات -->
+    <sys:String x:Key="SettingsCheckForUpdateButtonCheck">تحقق</sys:String>
+    <sys:String x:Key="SettingsCheckForUpdateButtonUpdate">تحديث</sys:String>
+    <sys:String x:Key="SettingsCheckForUpdatesTitle">التحقق من وجود تحديثات</sys:String>
+
+    <!-- الأقسام -->
+    <sys:String x:Key="SettingsTitle">الإعدادات</sys:String>
+    <sys:String x:Key="SettingsSectionPoints">النقاط</sys:String>
+    <sys:String x:Key="SettingsSectionGeneral">عام</sys:String>
+    <sys:String x:Key="SettingsAboutTitle">حول</sys:String>
+
+    <!-- المدة العامة -->
+    <sys:String x:Key="SettingsGlobalDurationTitle">المدة العامة</sys:String>
+    <sys:String x:Key="SettingsGlobalDurationDescription">المدة الافتراضية للنقاط الجديدة</sys:String>
+
+    <!-- نوع النقر العام -->
+    <sys:String x:Key="SettingsClickTypeTitle">نوع النقر العام</sys:String>
+    <sys:String x:Key="SettingsClickTypeDescription">نوع النقر للنقاط المستخدم للنقاط الجديدة</sys:String>
+
+    <!-- زر الفأرة العام -->
+    <sys:String x:Key="SettingsGlobalMouseButtonTitle">زر الفأرة العام</sys:String>
+    <sys:String x:Key="SettingsGlobalMouseButtonDescription">زر الفأرة المستخدم للنقاط الجديدة</sys:String>
+
+    <!-- مفتاح التشغيل -->
+    <sys:String x:Key="SettingsToggleHotkeyTitle">زر التشغيل</sys:String>
+    <sys:String x:Key="SettingsToggleHotkeyDescription">الزرأو الأزرار المستخدم(ة) لبدء أو إيقاف النقر التلقائي.</sys:String>
+    <sys:String x:Key="HotkeyChangeTooltip">اضغط أي مفتاح أو مجموعة مفاتيح لتغيير مفتاح الاختصار.</sys:String>
+    
+    <!-- عدد التكرارات -->
+    <sys:String x:Key="SettingsLoopCountTitle">عدد التكرارات</sys:String>
+    <sys:String x:Key="SettingsLoopCountDescription">ضع 0 لجعل التكرار غير محدود</sys:String>
+
+    <!-- موضع القائمة -->
+    <sys:String x:Key="SettingsMenuDockTitle">موضع القائمة</sys:String>
+    <sys:String x:Key="SettingsMenuDockDescription">يغيّر موضع ظهور القائمة</sys:String>
+
+    <!-- دوماً في الأعلى -->
+    <sys:String x:Key="SettingsAlwaysOnTopTitle">دوماً في الأعلى</sys:String>
+    <sys:String x:Key="SettingsAlwaysOnTopDescription">تبقى هذه النافذة دائماً فوق النوافذ الأخرى</sys:String>
+
+    <!-- سمة التطبيق -->
+    <sys:String x:Key="SettingsAppThemeTitle">سمة التطبيق</sys:String>
+    <sys:String x:Key="SettingsAppThemeDescription">اختر سمة التطبيق المراد عرضها</sys:String>
+
+    <!-- لغة التطبيق -->
+    <sys:String x:Key="SettingsAppLanguageTitle">لغة التطبيق</sys:String>
+    <sys:String x:Key="SettingsAppLanguageDescription">اختر اللغة التي سيتم عرض التطبيق بها</sys:String>
+
+    <!-- أزرار الفأرة -->
+    <sys:String x:Key="MouseButtonLeft">يسار</sys:String>
+    <sys:String x:Key="MouseButtonRight">يمين</sys:String>
+    <sys:String x:Key="MouseButtonMiddle">وسط</sys:String>
+
+    <!-- نوع النقر -->
+    <sys:String x:Key="ClickTypeSingle">أحادي</sys:String>
+    <sys:String x:Key="ClickTypeDouble">ثنائي</sys:String>
+
+    <!-- موضع القائمة -->
+    <sys:String x:Key="MenuDockTop">أعلى</sys:String>
+    <sys:String x:Key="MenuDockLeft">يمين</sys:String>
+
+    <!-- خيارات السمة -->
+    <sys:String x:Key="ThemeDark">داكنة</sys:String>
+    <sys:String x:Key="ThemeLight">فاتحة</sys:String>
+
+    <!-- عرض النقاط -->
+    <sys:String x:Key="PointsEmptyTitle">لا توجد نقاط متاحة</sys:String>
+    <sys:String x:Key="PointsEmptyDescription">أضف نقاطاً أو اسحب ملفات ‎.PAC‎ لتحميلها.</sys:String>
+
+    <!-- خيارات النقطة -->
+    <sys:String x:Key="PointOrderLabel">الترتيب</sys:String>
+    <sys:String x:Key="PointDurationLabel">المدة</sys:String>
+    <sys:String x:Key="PointPositionLabel">الموقع</sys:String>
+
+    <!-- معلومات النقطة -->
+    <sys:String x:Key="PointPositionXLabel">س</sys:String>
+    <sys:String x:Key="PointPositionYLabel">ص</sys:String>
+
+    <!-- التواصل الاجتماعي -->
+    <sys:String x:Key="SocialLinksHeader">روابط التواصل</sys:String>
+    <sys:String x:Key="GithubInviteDescription">تابعني على Github!</sys:String>
+    <sys:String x:Key="YoutubeInviteDescription">إشترك في قناتي على يوتيوب!</sys:String>
+    <sys:String x:Key="DiscordInviteDescription">إنضم الى مجتمعي في الديسكورد للتحديثات والمزيد!</sys:String>
+
+</ResourceDictionary>

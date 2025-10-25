@@ -1,0 +1,17 @@
+﻿<Application x:Class="PointAC.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:PointAC" xmlns:wpf="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+             Startup="Application_Startup">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
+
+                <ResourceDictionary Source="pack://application:,,,/PointAC;component/Resources/Links.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/PointAC;component/Localization/English.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
+    </Application.Resources>
+</Application>
