@@ -1,10 +1,11 @@
 ﻿using Size = System.Drawing.Size;
 using Point = System.Drawing.Point;
 using System.Collections.ObjectModel;
-using ClickType = PointAC.MouseHandler.ClickType;
-using MouseButton = PointAC.MouseHandler.MouseButton;
+using ClickType = PointAC.Services.MouseService.ClickType;
+using MouseButton = PointAC.Services.MouseService.MouseButton;
+using PointAC.Miscellaneous;
 
-namespace PointAC
+namespace PointAC.Core
 {
     public class PointManager
     {
@@ -15,7 +16,7 @@ namespace PointAC
 
         public PointManager()
         {
-            D2DOverlay.Instance.RendererRecreated += OnRendererRecreated;
+            PointsOverlay.Instance.RendererRecreated += OnRendererRecreated;
         }
 
         #region Events
@@ -28,20 +29,24 @@ namespace PointAC
                     point.Position.Y - PointSize.Height / 2
                 );
 
-                point.Handle = D2DOverlay.Instance.Add("Assets/Target.png", centeredPoint, PointSize);
+                point.Handle = PointsOverlay.Instance.Add("Assets/Target.png", centeredPoint, PointSize);
             }
         }
         #endregion
 
         #region Exposed Methods
-        public Guid AddPoint(Point position, MouseButton button, ClickType clickType, int duration)
+        public Guid AddPoint(string? customImage, Point position, MouseButton button, ClickType clickType, int duration)
         {
             var centeredPoint = new Point(
                 position.X - PointSize.Width / 2,
                 position.Y - PointSize.Height / 2
             );
 
-            var handle = D2DOverlay.Instance.Add("Assets/Target.png", centeredPoint, PointSize);
+            string imageSource = RandomUtilities.IsValidBitmap(customImage)
+                ? customImage!
+                : "pack://application:,,,/PointAC;component/Assets/Target.png";
+
+            var handle = PointsOverlay.Instance.Add(imageSource, centeredPoint, PointSize);
             
             int nextOrder = Points.Any() ? Points.Max(p => p.Order) + 1 : 0;
 
@@ -62,7 +67,7 @@ namespace PointAC
             var nearest = Points.OrderBy(p => Distance(p.Position, target)).First();
             if (Distance(nearest.Position, target) <= radius)
             {
-                D2DOverlay.Instance.Remove(nearest.Handle);
+                PointsOverlay.Instance.Remove(nearest.Handle);
                 Points.Remove(nearest);
                 return true;
             }
@@ -73,7 +78,7 @@ namespace PointAC
         public void ClearAll()
         {
             foreach (var p in Points)
-                D2DOverlay.Instance.Remove(p.Handle);
+                PointsOverlay.Instance.Remove(p.Handle);
 
             Points.Clear();
         }

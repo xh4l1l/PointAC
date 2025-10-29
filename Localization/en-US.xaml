@@ -2,11 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Application -->
-    <sys:String x:Key="AppName">Point Auto Clicker</sys:String>
-    <sys:String x:Key="AppTitle">Point Auto Clicker</sys:String>
-    <sys:String x:Key="AppCopyright">Developed by Kh4l1l (@xh4l1l)</sys:String>
-
     <!-- Buttons Tooltips -->
     <sys:String x:Key="ToggleButtonTooltip">Toggle</sys:String>
     <sys:String x:Key="LoopedButtonTooltip">Looped</sys:String>
@@ -20,6 +15,7 @@
     <!-- General -->
     <sys:String x:Key="GeneralOn">On</sys:String>
     <sys:String x:Key="GeneralOff">Off</sys:String>
+    <sys:String x:Key="GeneralNone">None</sys:String>
     <sys:String x:Key="GeneralSystemSetting">Use system setting</sys:String>
     <sys:String x:Key="GeneralMillisecondLabel">Millisecond(s)</sys:String>
 
@@ -62,9 +58,16 @@
     <sys:String x:Key="SettingsAppThemeTitle">App Theme</sys:String>
     <sys:String x:Key="SettingsAppThemeDescription">Select which app theme to display</sys:String>
 
-    <!-- AppLanguage -->
+    <!-- App Backdrop -->
+    <sys:String x:Key="SettingsAppBackdropTitle">App Backdrop</sys:String>
+    <sys:String x:Key="SettingsAppBackdropDescription">Select which backdrop material to apply</sys:String>
+
+    <!-- App Language -->
     <sys:String x:Key="SettingsAppLanguageTitle">App Language</sys:String>
     <sys:String x:Key="SettingsAppLanguageDescription">Select which language the app will be displayed in</sys:String>
+
+    <!-- About App -->
+    <sys:String x:Key="SettingsAboutDescription">By</sys:String>
 
     <!-- Updates -->
     <sys:String x:Key="UpdateError">Failed to check for updates.</sys:String>
@@ -85,6 +88,11 @@
     <!-- Click Types -->
     <sys:String x:Key="ClickTypeSingle">Single</sys:String>
     <sys:String x:Key="ClickTypeDouble">Double</sys:String>
+
+    <!-- Backdrop Types -->
+    <sys:String x:Key="BackdropTypeMica">Mica</sys:String>
+    <sys:String x:Key="BackdropTypeAcrylic">Acrylic</sys:String>
+    <sys:String x:Key="BackdropTypeTabbed">Mica Alt</sys:String>
 
     <!-- Menu Dock options -->
     <sys:String x:Key="MenuDockTop">Top</sys:String>

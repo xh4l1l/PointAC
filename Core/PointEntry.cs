@@ -1,12 +1,13 @@
-﻿using System;
+﻿using PointAC.Services;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using ClickType = PointAC.MouseHandler.ClickType;
-using MouseButton = PointAC.MouseHandler.MouseButton;
+using ClickType = PointAC.Services.MouseService.ClickType;
+using MouseButton = PointAC.Services.MouseService.MouseButton;
 
-namespace PointAC
+namespace PointAC.Core
 {
     public class PointEntry : INotifyPropertyChanged
     {
@@ -62,10 +63,10 @@ namespace PointAC
         }
         public string ButtonString
         {
-            get => MouseHandler.GetStringFromMouseButton(Button);
+            get => MouseService.GetStringFromMouseButton(Button);
             set
             {
-                var parsed = MouseHandler.GetMouseButtonFromString(value);
+                var parsed = MouseService.GetMouseButtonFromString(value);
                 if (Button != parsed)
                 {
                     Button = parsed;
@@ -77,10 +78,10 @@ namespace PointAC
 
         public string ClickTypeString
         {
-            get => MouseHandler.GetStringFromClickType(ClickType);
+            get => MouseService.GetStringFromClickType(ClickType);
             set
             {
-                var parsed = MouseHandler.GetClickTypeFromString(value);
+                var parsed = MouseService.GetClickTypeFromString(value);
                 if (ClickType != parsed)
                 {
                     ClickType = parsed;
