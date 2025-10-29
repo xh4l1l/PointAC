@@ -8,8 +8,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
 
-                <ResourceDictionary Source="pack://application:,,,/PointAC;component/Resources/Links.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/PointAC;component/Localization/English.xaml" />
+                <ResourceDictionary Source="/Resources/Info.xaml" />
+                <ResourceDictionary Source="/Resources/Links.xaml" />
+                <ResourceDictionary Source="/Localization/en-US.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
         

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
 using System.Windows.Input;
+using System.Runtime.InteropServices;
 
-namespace PointAC
+namespace PointAC.Services
 {
-    public static class KeyboardHandler
+    public static class KeyboardService
     {
         private static Action<Key>? _onKeyDown;
         private static Action<Key>? _onKeyUp;

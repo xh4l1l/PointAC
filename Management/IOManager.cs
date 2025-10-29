@@ -1,13 +1,14 @@
-﻿using System;
+﻿using PointAC.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace PointAC
+namespace PointAC.Management
 {
-    public static class AppFileOperations
+    public static class IOManager
     {
         public static string FileType { get; } = ".pac";
 

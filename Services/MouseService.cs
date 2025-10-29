@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Point = System.Drawing.Point;
 
-namespace PointAC
+namespace PointAC.Services
 {
-    public static class MouseHandler
+    public static class MouseService
     {
         private static Action<Point>? _onMove;
         private static Func<Point, bool>? _onClick;

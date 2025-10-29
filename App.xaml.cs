@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PointAC.Management;
+using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
@@ -55,7 +56,7 @@ namespace PointAC
                 {
                     try
                     {
-                        var data = await AppFileOperations.LoadFromFileAsync(resolved);
+                        var data = await IOManager.LoadFromFileAsync(resolved);
                         mainWindow?.LoadPoints(data);
                     }
                     catch (Exception ex)
@@ -112,7 +113,7 @@ namespace PointAC
                                 {
                                     try
                                     {
-                                        var data = await AppFileOperations.LoadFromFileAsync(resolved);
+                                        var data = await IOManager.LoadFromFileAsync(resolved);
                                         mainWindow?.LoadPoints(data);
                                         mainWindow?.Activate();
                                     }

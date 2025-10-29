@@ -1,18 +1,16 @@
-﻿using System;
+﻿using System.Windows.Data;
 using System.Globalization;
-using System.Windows.Data;
 
-namespace PointAC
+namespace PointAC.Miscellaneous
 {
     public class IntSafeConverter : IValueConverter
     {
-        // This will remember the last valid value per binding.
-        private string _lastValidValue = "0";
+        private string lastValidInput = "0";
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            _lastValidValue = value?.ToString() ?? "0";
-            return _lastValidValue;
+            lastValidInput = value?.ToString() ?? "0";
+            return lastValidInput;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -21,11 +19,11 @@ namespace PointAC
 
             if (int.TryParse(input, out int result))
             {
-                _lastValidValue = input;
+                lastValidInput = input;
                 return result;
             }
 
-            return new RevertTextBindingResult(_lastValidValue);
+            return new RevertTextBindingResult(lastValidInput);
         }
 
         private class RevertTextBindingResult

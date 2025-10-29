@@ -4,4 +4,5 @@
     <sys:String x:Key="GithubLink">https://github.com/xh4l1l</sys:String>
     <sys:String x:Key="YoutubeLink">https://www.youtube.com/@xh4l1l</sys:String>
     <sys:String x:Key="SupportLink">https://www.discord.gg/Wf3VPU7Zez</sys:String>
+    <sys:String x:Key="VersionLink">https://raw.githubusercontent.com/xh4l1l/Versions/refs/heads/main/PointAC</sys:String>
 </ResourceDictionary>

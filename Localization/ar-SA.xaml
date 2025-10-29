@@ -2,11 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- التطبيق -->
-    <sys:String x:Key="AppName">Point Auto Clicker</sys:String>
-    <sys:String x:Key="AppTitle">Point Auto Clicker</sys:String>
-    <sys:String x:Key="AppCopyright">تم التطوير بواسطة Kh4l1l (@xh4l1l)</sys:String>
-
     <!-- تلميحات الأزرار -->
     <sys:String x:Key="ToggleButtonTooltip">تشغيل/إيقاف</sys:String>
     <sys:String x:Key="LoopedButtonTooltip">تكرار</sys:String>
@@ -20,9 +15,10 @@
     <!-- عام -->
     <sys:String x:Key="GeneralOn">تشغيل</sys:String>
     <sys:String x:Key="GeneralOff">إيقاف</sys:String>
+    <sys:String x:Key="GeneralNone">لا شيء</sys:String>
     <sys:String x:Key="GeneralSystemSetting">استخدام إعداد النظام</sys:String>
     <sys:String x:Key="GeneralMillisecondLabel">ملي ثانية</sys:String>
-
+    
     <!-- التحديثات -->
     <sys:String x:Key="UpdateAvailable">إصدار جديد متوفر!</sys:String>
     <sys:String x:Key="UpdateUpToDate">أنت تستخدم أحدث إصدار.</sys:String>
@@ -73,9 +69,16 @@
     <sys:String x:Key="SettingsAppThemeTitle">سمة التطبيق</sys:String>
     <sys:String x:Key="SettingsAppThemeDescription">اختر سمة التطبيق المراد عرضها</sys:String>
 
+    <!-- خلفية التطبيق -->
+    <sys:String x:Key="SettingsAppBackdropTitle">خلفية التطبيق</sys:String>
+    <sys:String x:Key="SettingsAppBackdropDescription">اختر نوع تأثير الخلفية الذي ترغب في تطبيقه</sys:String>
+    
     <!-- لغة التطبيق -->
     <sys:String x:Key="SettingsAppLanguageTitle">لغة التطبيق</sys:String>
     <sys:String x:Key="SettingsAppLanguageDescription">اختر اللغة التي سيتم عرض التطبيق بها</sys:String>
+
+    <!-- حول التطبيق -->
+    <sys:String x:Key="SettingsAboutDescription">بواسطة</sys:String>
 
     <!-- أزرار الفأرة -->
     <sys:String x:Key="MouseButtonLeft">يسار</sys:String>
@@ -93,6 +96,11 @@
     <!-- خيارات السمة -->
     <sys:String x:Key="ThemeDark">داكنة</sys:String>
     <sys:String x:Key="ThemeLight">فاتحة</sys:String>
+
+    <!-- أنواع الخلفية -->
+    <sys:String x:Key="BackdropTypeMica">ميكا</sys:String>
+    <sys:String x:Key="BackdropTypeAcrylic">أكريليك</sys:String>
+    <sys:String x:Key="BackdropTypeTabbed">ميكا البديل</sys:String>
 
     <!-- عرض النقاط -->
     <sys:String x:Key="PointsEmptyTitle">لا توجد نقاط متاحة</sys:String>

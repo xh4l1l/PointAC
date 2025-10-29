@@ -1,30 +1,29 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Data;
+using PointAC.Core;
 using System.Windows;
 using Microsoft.Win32;
+using PointAC.Services;
+using PointAC.Management;
 using System.Diagnostics;
 using System.Configuration;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Globalization;
+using PointAC.Miscellaneous;
 using System.Windows.Controls;
 using Point = System.Drawing.Point;
-using System.Runtime.InteropServices;
-using static PointAC.AppFileOperations;
+using static PointAC.Management.IOManager;
 using WindowState = System.Windows.WindowState;
-using ClickType = PointAC.MouseHandler.ClickType;
-using MouseButton = PointAC.MouseHandler.MouseButton;
 using Orientation = System.Windows.Controls.Orientation;
+using Configuration = System.Configuration.Configuration;
+using ClickType = PointAC.Services.MouseService.ClickType;
+using MouseButton = PointAC.Services.MouseService.MouseButton;
+using UpdateStatus = PointAC.Services.UpdateService.UpdateStatus;
 
 namespace PointAC
 {
     public partial class MainWindow : Window
     {
-        #region App Main
-        public static string AppVersion { get; } = "1.0";
-        #endregion
-
         #region Window Settings
         private WindowState windowState;
         private double windowLeft, windowTop;
@@ -39,9 +38,12 @@ namespace PointAC
         private string theme = "System";
         private string button = "System";
         private string menuStyle = "Top";
+        private string backdrop = "Mica";
         private string language = "System";
         private string clickType = "Single";
-        private HashSet<Key> toggleKey = new() { Key.F6 };
+        private string targetImage = "System"; // Partially Implemented, UI Required.
+        private string backgroundImage = "None"; // Will be implemented later.
+        private HashSet<Key> toggleShortcut = new() { Key.F6 };
         #endregion
 
         #region Variables
@@ -68,53 +70,38 @@ namespace PointAC
         {
             InitializeComponent();
 
-            try
-            {
-                configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                appSettings = configuration.AppSettings.Settings;
+            configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            appSettings = configuration.AppSettings.Settings;
 
-                theme = GetSetting("Theme", theme);
-                button = GetSetting("Button", button);
-                looped = GetSetting("Looped", looped);
-                language = GetSetting("Language", language);
-                duration = GetSetting("Duration", duration);
-                menuStyle = GetSetting("MenuStyle", menuStyle);
-                loopCount = GetSetting("LoopCount", loopCount);
-                clickType = GetSetting("ClickType", clickType);
-                toggleKey = GetSetting("ToggleHotkey", toggleKey);
-                alwaysOnTop = GetSetting("AlwaysOnTop", alwaysOnTop);
-                windowState = GetSetting("WindowState", WindowState.Normal);
-                var size = GetSetting("WindowSize", new Size(Width, Height));
-                var location = GetSetting("WindowLocation", new Point((int)Left, (int)Top));
-                
-                windowTop = location.Y;
-                windowLeft = location.X;
-                windowWidth = size.Width;
-                windowHeight = size.Height;
+            theme = GetSetting("Theme", theme);
+            button = GetSetting("Button", button);
+            looped = GetSetting("Looped", looped);
+            backdrop = GetSetting("Backdrop", backdrop);
+            language = GetSetting("Language", language);
+            duration = GetSetting("Duration", duration);
+            menuStyle = GetSetting("MenuStyle", menuStyle);
+            loopCount = GetSetting("LoopCount", loopCount);
+            clickType = GetSetting("ClickType", clickType);
+            alwaysOnTop = GetSetting("AlwaysOnTop", alwaysOnTop);
+            windowState = GetSetting("WindowState", WindowState.Normal);
+            var size = GetSetting("WindowSize", new Size(Width, Height));
+            toggleShortcut = GetSetting("ToggleShortcut", toggleShortcut);
+            var location = GetSetting("WindowLocation", new Point((int)Left, (int)Top));
 
-                this.ThemeMode = theme switch
-                {
-                    "Light" => ThemeMode.Light,
-                    "Dark" => ThemeMode.Dark,
-                    _ => ThemeMode.System
-                };
-                
-                Top = windowTop;
-                Left = windowLeft;
-                Width = windowWidth;
-                Height = windowHeight;
-                ApplyLanguage(language);
-                WindowState = windowState;
-                currentButton = MouseHandler.GetMouseButtonFromString(button);
-                currentClickType = MouseHandler.GetClickTypeFromString(clickType);
+            windowTop = location.X;
+            windowLeft = location.Y;
+            windowWidth = size.Width;
+            windowHeight = size.Height;
 
-                configuration.Save(ConfigurationSaveMode.Full);
-                ConfigurationManager.RefreshSection("appSettings");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Config Error] {ex.Message}");
-            }
+            Top = windowTop;
+            Left = windowLeft;
+            Width = windowWidth;
+            Height = windowHeight;
+            WindowState = windowState;
+            UIManager.ApplyLanguage(this, language);
+            UIManager.ApplyTheme(this, theme, backdrop);
+            currentButton = MouseService.GetMouseButtonFromString(button);
+            currentClickType = MouseService.GetClickTypeFromString(clickType);
 
             PointsList.ItemsSource = pointManager.Points;
 
@@ -129,11 +116,11 @@ namespace PointAC
                 }
             };
 
-            MouseHandler.ListenToMouseClick(screenPoint =>
+            MouseService.ListenToMouseClick(screenPoint =>
             {
-                if (IsClickInsideAppWindow(screenPoint))
+                if (RandomUtilities.IsClickInsideAppWindow(this, screenPoint))
                 {
-                    var addButtonBounds = GetElementScreenBounds(AddButton);
+                    var addButtonBounds = RandomUtilities.GetElementScreenBounds(this, AddButton);
                     if (addButtonBounds.Contains(screenPoint))
                         return false;
 
@@ -142,7 +129,7 @@ namespace PointAC
 
                 if (currentMode == "Add")
                 {
-                    pointManager.AddPoint(screenPoint, currentButton, currentClickType, duration);
+                    pointManager.AddPoint(targetImage, screenPoint, currentButton, currentClickType, duration);
                     return true;
                 }
                 else if (currentMode == "Remove")
@@ -156,7 +143,7 @@ namespace PointAC
                 return false;
             });
 
-            MouseHandler.ListenToMouseMove(screenPoint =>
+            MouseService.ListenToMouseMove(screenPoint =>
             {
                 if (pointManager.IsRuntimeMode || currentMode == "Add")
                     return;
@@ -168,10 +155,10 @@ namespace PointAC
                 lastMousePosition = screenPoint;
 
                 var nearest = pointManager.Points
-                    .OrderBy(p => Distance(p.Position, screenPoint))
+                    .OrderBy(p => RandomUtilities.Distance(p.Position, screenPoint))
                     .FirstOrDefault();
 
-                double minDist = nearest == null ? double.MaxValue : Distance(nearest.Position, screenPoint);
+                double minDist = nearest == null ? double.MaxValue : RandomUtilities.Distance(nearest.Position, screenPoint);
                 const int hoverRadius = 15;
 
                 bool hoverChanged = nearest != lastHovered || (nearest != null && minDist > hoverRadius);
@@ -191,7 +178,7 @@ namespace PointAC
                 }
             });
 
-            KeyboardHandler.ListenToKeyDown(key =>
+            KeyboardService.ListenToKeyDown(key =>
             {
                 bool isModifier = key == Key.LeftCtrl || key == Key.RightCtrl ||
                                   key == Key.LeftAlt || key == Key.RightAlt ||
@@ -213,135 +200,63 @@ namespace PointAC
                         return;
 
                     var formattedKeys = modifiers.Concat(normalKeys)
-                        .Select(k => FormatKeyName(k))
+                        .Select(k => RandomUtilities.FormatKeyName(k))
                         .ToList();
 
                     Dispatcher.Invoke(() =>
                     {
-                        CurrentHotkeyButtons.Text = string.Join(" + ", formattedKeys);
+                        CurrentHotkeyButtons.Text = RandomUtilities.GetFormattedShortcut(currentlyPressedKeys);
                     });
 
-                    toggleKey = new HashSet<Key>(modifiers.Concat(normalKeys));
-                    SaveSetting("ToggleHotkey", GetFormattedToggleKey());
+                    toggleShortcut = [.. modifiers.Concat(normalKeys)];
+                    SaveSetting("ToggleShortcut", string.Join("+", toggleShortcut.Select(k => k.ToString())));
                     return;
                 }
 
-                if (IsShortcutPressed(new KeyEventArgs(
+                if (RandomUtilities.IsShortcutPressed(new KeyEventArgs(
                     Keyboard.PrimaryDevice,
                     PresentationSource.FromVisual(Application.Current.MainWindow),
-                    0, key), toggleKey))
+                    0, key), toggleShortcut))
                 {
                     ToggleButton_Click(null!, null!);
                 }
             });
 
-            KeyboardHandler.ListenToKeyUp(key =>
+            KeyboardService.ListenToKeyUp(key =>
             {
                 currentlyPressedKeys.Remove(key);
             });
         }
 
-        #region Events Methods
+        #region Event Methods
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                LoopButton_Click(null, e);
-                LoopCountTextBox.Text = loopCount.ToString();
-                GlobalDurationTextBox.Text = duration.ToString();
-                CurrentHotkeyButtons.Text = string.Join("+", toggleKey
-            .OrderBy(k => k.ToString())
-            .Select(k => FormatKeyName(k)));
+            LoopCountTextBox.Text = loopCount.ToString();
+            GlobalDurationTextBox.Text = duration.ToString();
+            CurrentHotkeyButtons.Text = RandomUtilities.GetFormattedShortcut(toggleShortcut);
 
-                CheckForUpdatesButton_Click(null!, null!);
-            }
-            catch (Exception ex)
-            {
-                Debug.Write(ex.Message);
-            }
-
-            try
-            {
-                foreach (ComboBoxItem item in ClickTypeSelector.Items)
-                {
-                    if (item.Tag?.ToString() == clickType)
-                    {
-                        ClickTypeSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                foreach (ComboBoxItem item in MouseButtonSelector.Items)
-                {
-                    if (item.Tag?.ToString() == button)
-                    {
-                        MouseButtonSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                foreach (ComboBoxItem item in MenuStyleSelector.Items)
-                {
-                    if (item.Tag?.ToString() == menuStyle)
-                    {
-                        SetMenuDock();
-                        MenuStyleSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                foreach (ComboBoxItem item in AlwaysOnTopSelector.Items)
-                {
-                    if (item.Tag?.ToString()?.ToLower() == alwaysOnTop.ToString().ToLower())
-                    {
-                        Topmost = alwaysOnTop;
-                        AlwaysOnTopSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                foreach (ComboBoxItem item in AppThemeSelector.Items)
-                {
-                    if (item.Tag?.ToString() == theme)
-                    {
-                        AppThemeSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-
-                foreach (ComboBoxItem item in AppLanguageSelector.Items)
-                {
-                    if (item.Tag?.ToString() == language)
-                    {
-                        AppLanguageSelector.SelectedItem = item;
-                        break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.Write(ex.Message);
-            }
+            LoopButton_Click(null!, null!);
+            CheckForUpdatesButton_Click(null!, null!);
+            SelectComboItemByTag(AppThemeSelector, theme);
+            SelectComboItemByTag(MouseButtonSelector, button);
+            SelectComboItemByTag(ClickTypeSelector, clickType);
+            SelectComboItemByTag(AppBackdropSelector, backdrop);
+            SelectComboItemByTag(AppLanguageSelector, language);
+            SelectComboItemByTag(MenuStyleSelector, menuStyle, SetMenuDock);
+            SelectComboItemByTag(AlwaysOnTopSelector, alwaysOnTop.ToString().ToLower(), () => Topmost = alwaysOnTop);
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            pointManager.ClearAll();
-        }
+        private void Window_Closed(object sender, EventArgs e) => pointManager.ClearAll();
 
         private void Window_DragOver(object sender, DragEventArgs e)
         {
             e.Effects = DragDropEffects.None;
-
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 var files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (files.Length > 0 && Path.GetExtension(files[0]).Equals(FileType, StringComparison.OrdinalIgnoreCase))
-                {
                     e.Effects = DragDropEffects.Copy;
-                }
             }
-
             e.Handled = true;
         }
 
@@ -352,35 +267,26 @@ namespace PointAC
 
             try
             {
-                if (!e.Data.GetDataPresent(DataFormats.FileDrop))
-                    return;
+                if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
 
                 var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                if (files.Length == 0)
-                    return;
+                if (files.Length == 0) return;
 
                 string filePath = files[0];
-
-                if (!Path.GetExtension(filePath).Equals(FileType, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
+                if (!Path.GetExtension(filePath).Equals(FileType, StringComparison.OrdinalIgnoreCase)) return;
 
                 var data = await LoadFromFileAsync(filePath);
-
                 LoadPoints(data);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Debug.WriteLine($"[Window_Drop] {ex.Message}");
             }
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            if (WindowState == WindowState.Minimized)
-                return;
-
+            if (WindowState == WindowState.Minimized) return;
             windowState = WindowState;
             SaveSetting("WindowState", windowState.ToString());
         }
@@ -388,9 +294,6 @@ namespace PointAC
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (WindowState != WindowState.Normal) return;
-
-            windowWidth = e.NewSize.Width;
-            windowHeight = e.NewSize.Height;
             SaveSetting("WindowSize", $"{Math.Round(windowWidth)},{Math.Round(windowHeight)}");
         }
 
@@ -398,8 +301,6 @@ namespace PointAC
         {
             if (WindowState != WindowState.Normal) return;
 
-            windowTop = Top;
-            windowLeft = Left;
             SaveSetting("WindowLocation", $"{windowLeft},{windowTop}");
         }
 
@@ -418,7 +319,6 @@ namespace PointAC
                 SettingsButton_Click(SettingsButton, e);
 
             pointManager.SetRuntimeMode(true);
-
             await StartClickingAsync().ConfigureAwait(false);
         }
 
@@ -430,166 +330,137 @@ namespace PointAC
                 SaveSetting("Looped", looped.ToString());
             }
 
-
-            if (looped)
-            {
-                LoopButton.Background = (System.Windows.Media.Brush)FindResource("ControlFillColorSecondaryBrush");
-            }
-            else
-            {
-                LoopButton.Background = Brushes.Transparent;
-            }
+            LoopButton.Background = looped
+                ? (Brush)FindResource("ControlFillColorSecondaryBrush")
+                : Brushes.Transparent;
         }
 
-        private void AddButton_Click(object sender, RoutedEventArgs e)
-        {
-            currentMode = (currentMode != "Add") ? "Add" : "Normal";
-            UpdateModeVisuals();
-        }
-
-        private void RemoveButton_Click(object sender, RoutedEventArgs e)
-        {
-            currentMode = (currentMode != "Remove") ? "Remove" : "Normal";
-
-            UpdateModeVisuals();
-        }
-
-        private void ClearButton_Click(object sender, RoutedEventArgs e)
-        {
-            pointManager.ClearAll();
-            currentMode = "Normal";
-            UpdateModeVisuals();
-        }
+        private void AddButton_Click(object sender, RoutedEventArgs e) => ToggleMode("Add");
+        private void RemoveButton_Click(object sender, RoutedEventArgs e) => ToggleMode("Remove");
+        private void ClearButton_Click(object sender, RoutedEventArgs e) { pointManager.ClearAll(); ToggleMode("Normal"); }
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (pointManager.Points.Count <= 0)
-                return;
-
-            currentMode = "Normal";
-            UpdateModeVisuals();
+            if (pointManager.Points.Count <= 0) return;
+            ToggleMode("Normal");
 
             try
             {
-                var saveDialog = new SaveFileDialog
+                var dlg = new SaveFileDialog
                 {
-                    FileName = "",
                     DefaultExt = FileType,
                     Title = "Save Points File",
                     Filter = $"Point Auto Clicker File (*{FileType})|*{FileType}",
                 };
 
-                if (saveDialog.ShowDialog() != true)
-                    return;
-
-                var data = new AppFileData
-                {
-                    Points = pointManager.Points.ToList()
-                };
-
-                await AppFileOperations.SaveToFileAsync(saveDialog.FileName, data);
+                if (dlg.ShowDialog() == true)
+                    await IOManager.SaveToFileAsync(dlg.FileName, new AppFileData { Points = pointManager.Points.ToList() });
             }
-            catch
+            catch (Exception ex)
             {
-
+                Debug.WriteLine($"[SaveButton] {ex.Message}");
             }
         }
 
         private async void LoadButton_Click(object sender, RoutedEventArgs e)
         {
-            currentMode = "Normal";
-            UpdateModeVisuals();
+            ToggleMode("Normal");
 
             try
             {
-                var openDialog = new Microsoft.Win32.OpenFileDialog
+                var dlg = new OpenFileDialog
                 {
                     DefaultExt = FileType,
-                    Title = "Save Points File",
+                    Title = "Load Points File",
                     Filter = $"Point Auto Clicker File (*{FileType})|*{FileType}",
                 };
 
-                if (openDialog.ShowDialog() != true)
-                    return;
-
-                var data = await LoadFromFileAsync(openDialog.FileName);
-
-                LoadPoints(data);
+                if (dlg.ShowDialog() == true)
+                    LoadPoints(await LoadFromFileAsync(dlg.FileName));
             }
-            catch
+            catch (Exception ex)
             {
-
+                Debug.WriteLine($"[LoadButton] {ex.Message}");
             }
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            currentMode = "Normal";
-            UpdateModeVisuals();
-            bool isSettingsOpen = !(SettingsContainer.Visibility == Visibility.Visible);
+            ToggleMode("Normal");
+            bool open = SettingsContainer.Visibility != Visibility.Visible;
 
-            PointsContainer.Visibility = isSettingsOpen ? Visibility.Collapsed : Visibility.Visible;
-            SettingsContainer.Visibility = isSettingsOpen ? Visibility.Visible : Visibility.Collapsed;
+            PointsContainer.Visibility = open ? Visibility.Collapsed : Visibility.Visible;
+            SettingsContainer.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
 
-            if (isSettingsOpen)
-            {
-                SettingsButton.Background = (System.Windows.Media.Brush)FindResource("ControlFillColorSecondaryBrush");
-            }
-            else
-            {
-                SettingsButton.Background = Brushes.Transparent;
-            }
-        }
-
-        private void ClickTypeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string buttonTag = selectedItem.Tag?.ToString() ?? "System";
-                
-                clickType = buttonTag;
-                SaveSetting("ClickType", buttonTag);
-                currentClickType = MouseHandler.GetClickTypeFromString(buttonTag);
-            }
-        }
-
-        private void MouseButtonSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string buttonTag = selectedItem.Tag?.ToString() ?? "System";
-                button = buttonTag;
-
-                SaveSetting("Button", buttonTag);
-                currentButton = MouseHandler.GetMouseButtonFromString(buttonTag);
-            }
+            SettingsButton.Background = open
+                ? (Brush)FindResource("ControlFillColorSecondaryBrush")
+                : Brushes.Transparent;
         }
 
         private void LoopCountTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (int.TryParse(LoopCountTextBox.Text, out int newLoopCount))
+            if (int.TryParse(LoopCountTextBox.Text, out int newCount) && newCount >= 0)
             {
-                if (newLoopCount >= 0)
-                {
-                    loopCount = newLoopCount;
-                    LoopCountTextBox.Text = newLoopCount.ToString();
-                    SaveSetting("LoopCount", newLoopCount.ToString());
-                }
-                else
-                {
-                    LoopCountTextBox.Text = loopCount.ToString();
-                }
+                loopCount = newCount;
+                SaveSetting("LoopCount", newCount.ToString());
             }
-            else
+
+            LoopCountTextBox.Text = loopCount.ToString();
+        }
+
+        private void Selector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not ComboBox comboBox || comboBox.SelectedItem is not ComboBoxItem item)
+                return;
+
+            string tag = item.Tag?.ToString() ?? "System";
+
+            switch (comboBox.Name)
             {
-                LoopCountTextBox.Text = loopCount.ToString();
+                case nameof(ClickTypeSelector):
+                    clickType = tag;
+                    currentClickType = MouseService.GetClickTypeFromString(tag);
+                    SaveSetting("ClickType", tag);
+                    break;
+
+                case nameof(MouseButtonSelector):
+                    button = tag;
+                    currentButton = MouseService.GetMouseButtonFromString(tag);
+                    SaveSetting("Button", tag);
+                    break;
+
+                case nameof(AppThemeSelector):
+                    theme = tag;
+                    SaveSetting("Theme", tag);
+                    UIManager.ApplyTheme(this, theme, backdrop);
+                    break;
+
+                case nameof(AppBackdropSelector):
+                    backdrop = tag;
+                    SaveSetting("Backdrop", tag);
+                    UIManager.ApplyTheme(this, theme, backdrop);
+                    break;
+
+                case nameof(AppLanguageSelector):
+                    language = tag;
+                    SaveSetting("Language", tag);
+                    UIManager.ApplyLanguage(this, language);
+                    break;
+
+                case nameof(AlwaysOnTopSelector):
+                    alwaysOnTop = Convert.ToBoolean(tag);
+                    Topmost = alwaysOnTop;
+                    SaveSetting("AlwaysOnTop", alwaysOnTop.ToString());
+                    break;
+
+                case nameof(MenuStyleSelector):
+                    menuStyle = tag;
+                    SetMenuDock();
+                    SaveSetting("MenuStyle", menuStyle);
+                    break;
             }
+
+            if (SettingsScrollViewer != null) RandomUtilities.ScrollIntoViewIfNotVisible(comboBox, SettingsScrollViewer);
         }
 
         private void HotkeyRegisterGrid_MouseEnter(object sender, MouseEventArgs e)
@@ -606,72 +477,9 @@ namespace PointAC
             CurrentHotkeyButtons.Visibility = Visibility.Collapsed;
         }
 
-        private void MenuStyleSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
+        private void CheckForUpdatesButton_Click(object sender, RoutedEventArgs e) => _ = CheckForUpdatesAsync();
 
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                menuStyle = selectedItem.Tag?.ToString() ?? "Left";
-
-                SetMenuDock();
-                SaveSetting("MenuStyle", menuStyle);
-            }
-        }
-
-        private void AlwaysOnTopSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                bool value = Convert.ToBoolean(selectedItem.Tag);
-
-                alwaysOnTop = value;
-                Topmost = value;
-
-                SaveSetting("AlwaysOnTop", value.ToString());
-            }
-        }
-
-        private void AppThemeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string themeTag = selectedItem.Tag?.ToString() ?? "System";
-                theme = themeTag;
-                this.ThemeMode = themeTag switch
-                {
-                    "Light" => ThemeMode.Light,
-                    "Dark" => ThemeMode.Dark,
-                    _ => ThemeMode.System
-                };
-
-                SaveSetting("Theme", themeTag);
-            }
-        }
-
-        private void AppLanguageSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            if (comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string languageTag = selectedItem.Tag?.ToString() ?? "System";
-
-                theme = languageTag;
-                ApplyLanguage(languageTag);
-                SaveSetting("Language", languageTag);
-            }
-        }
-
-        private async void CheckForUpdatesButton_Click(object sender, RoutedEventArgs e)
+        private async Task CheckForUpdatesAsync()
         {
             if (updateAvailable)
             {
@@ -681,53 +489,29 @@ namespace PointAC
 
             try
             {
-                CheckForUpdatesButtonText.Text = string.Empty;
+                CheckForUpdatesButtonText.Text = "";
                 CheckForUpdatesButton.IsEnabled = false;
                 CheckForUpdatesProgress.Visibility = Visibility.Visible;
-
                 CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, "CurrentlyCheckingForUpdates");
 
-                var (status, message) = await SafeCheckForUpdatesAsync();
+                Random random = new();
+                await Task.Delay(random.Next(1000, 3000)); // Intentional delay to let the user see the progress bar...
 
-                CheckForUpdatesButton.IsEnabled = true;
-                CheckForUpdatesProgress.Visibility = Visibility.Collapsed;
+                var (status, _) = await UpdateService.CheckForUpdatesAsync(
+                    (string)FindResource("VersionLink"),
+                    Version.Parse((string)FindResource("AppVersion")));
 
-                switch (status)
-                {
-                    case UpdateStatus.UpdateAvailable:
-                        updateAvailable = true;
-                        CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, "UpdateAvailable");
-                        CheckForUpdatesButtonText.SetResourceReference(TextBlock.TextProperty, "SettingsCheckForUpdateButtonUpdate");
-                        break;
-
-                    case UpdateStatus.UpToDate:
-                        updateAvailable = false;
-                        CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, "UpdateUpToDate");
-                        CheckForUpdatesButtonText.SetResourceReference(TextBlock.TextProperty, "SettingsCheckForUpdateButtonCheck");
-                        break;
-
-                    case UpdateStatus.CheckFailed:
-                    default:
-                        updateAvailable = false;
-                        CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, "UpdateError");
-                        CheckForUpdatesButtonText.SetResourceReference(TextBlock.TextProperty, "SettingsCheckForUpdateButtonCheck");
-                        break;
-                }
+                ReflectUpdateStatus(status);
             }
             catch
             {
-                CheckForUpdatesButton.IsEnabled = true;
-                CheckForUpdatesProgress.Visibility = Visibility.Collapsed;
-
-                CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, "UpdateError");
-                CheckForUpdatesButtonText.SetResourceReference(TextBlock.TextProperty, "SettingsCheckForUpdateButtonCheck");
+                ReflectUpdateStatus(UpdateStatus.CheckFailed);
             }
         }
-        private void GithubHyperlink_Click(object sender, RoutedEventArgs e) => LaunchLink("GithubLink");
 
-        private void YoutubeHyperlink_Click(object sender, RoutedEventArgs e) => LaunchLink("YoutubeLink");
-
-        private void DiscordHyperlink_Click(object sender, RoutedEventArgs e) => LaunchLink("SupportLink");
+        private void GithubHyperlink_Click(object s, RoutedEventArgs e) => LaunchLink("GithubLink");
+        private void YoutubeHyperlink_Click(object s, RoutedEventArgs e) => LaunchLink("YoutubeLink");
+        private void DiscordHyperlink_Click(object s, RoutedEventArgs e) => LaunchLink("SupportLink");
         #endregion
 
         #region Generic Events Methods
@@ -807,10 +591,54 @@ namespace PointAC
                     UseShellExecute = true
                 });
             }
-            else
+            else { }
+        }
+
+        private void ToggleMode(string mode)
+        {
+            currentMode = (currentMode != mode) ? mode : "Normal";
+            UpdateModeVisuals();
+        }
+
+        private void SelectComboItemByTag(ComboBox combo, string tag, Action? after = null)
+        {
+            try
             {
-                MessageBox.Show("Support link not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                combo.SelectionChanged -= Selector_SelectionChanged;
+
+                var item = combo.Items
+                    .OfType<ComboBoxItem>()
+                    .FirstOrDefault(i => i.Tag?.ToString()?.Equals(tag, StringComparison.OrdinalIgnoreCase) == true);
+
+                if (item != null)
+                {
+                    combo.SelectedItem = item;
+                    after?.Invoke();
+                }
             }
+            finally
+            {
+                combo.SelectionChanged += Selector_SelectionChanged;
+            }
+        }
+
+        private void ReflectUpdateStatus(UpdateStatus status)
+        {
+            CheckForUpdatesButton.IsEnabled = true;
+            CheckForUpdatesProgress.Visibility = Visibility.Collapsed;
+
+            string descKey, btnKey;
+            updateAvailable = status == UpdateStatus.UpdateAvailable;
+
+            (descKey, btnKey) = status switch
+            {
+                UpdateStatus.UpdateAvailable => ("UpdateAvailable", "SettingsCheckForUpdateButtonUpdate"),
+                UpdateStatus.UpToDate => ("UpdateUpToDate", "SettingsCheckForUpdateButtonCheck"),
+                _ => ("UpdateError", "SettingsCheckForUpdateButtonCheck")
+            };
+
+            CheckForUpdatesDescription.SetResourceReference(TextBlock.TextProperty, descKey);
+            CheckForUpdatesButtonText.SetResourceReference(TextBlock.TextProperty, btnKey);
         }
 
         public void LoadPoints(AppFileData data)
@@ -818,7 +646,7 @@ namespace PointAC
             pointManager.ClearAll();
             foreach (var point in data.Points)
             {
-                pointManager.AddPoint(point.Position, point.Button, point.ClickType, point.Duration);
+                pointManager.AddPoint(targetImage, point.Position, point.Button, point.ClickType, point.Duration);
             }
             if (SettingsContainer.Visibility == Visibility.Visible) SettingsButton_Click(SettingsButton, null!);
         }
@@ -855,7 +683,7 @@ namespace PointAC
                     {
                         while (isRunning)
                         {
-                            MouseHandler.SimulateClick(currentButton, currentClickType);
+                            MouseService.SimulateClick(currentButton, currentClickType);
                             await Task.Delay(duration);
                         }
                         return;
@@ -868,8 +696,8 @@ namespace PointAC
                             if (!isRunning)
                                 return;
 
-                            MouseHandler.MoveMouse(point.Position);
-                            MouseHandler.SimulateClick(point.Button, point.ClickType);
+                            MouseService.MoveMouse(point.Position);
+                            MouseService.SimulateClick(point.Button, point.ClickType);
 
                             await Task.Delay(point.Duration);
                         }
@@ -917,10 +745,7 @@ namespace PointAC
                 if (runningTask != null)
                     await runningTask;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"StopClickingAsync error: {ex.Message}");
-            }
+            catch { }
 
             runningTask = null;
         }
@@ -935,6 +760,92 @@ namespace PointAC
             ToggleButton.Background = currentMode == "Running" ? highlightBrush : transparentBrush;
         }
 
+        private void SetMenuDock()
+        {
+            if (menuStyle == "Left")
+            {
+                Grid.SetRow(MenuGrid, 1);
+                Grid.SetColumn(MenuGrid, 0);
+
+                Thickness margin = new Thickness
+                {
+                    Top = 2,
+                    Bottom = 2,
+                    Left = 4,
+                    Right = 16
+                };
+
+                PointsList.Margin = margin;
+                SettingsList.Margin = margin;
+
+                MiscPanel.Orientation = Orientation.Vertical;
+                ActionsPanel.Orientation = Orientation.Vertical;
+                MiscPanel.VerticalAlignment = VerticalAlignment.Bottom;
+                MenuGrid.VerticalAlignment = VerticalAlignment.Stretch;
+                ActionsPanel.VerticalAlignment = VerticalAlignment.Top;
+                MenuGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                MiscPanel.HorizontalAlignment = HorizontalAlignment.Center;
+                ActionsPanel.HorizontalAlignment = HorizontalAlignment.Center;
+            }
+            else
+            {
+                Grid.SetRow(MenuGrid, 0);
+                Grid.SetColumn(MenuGrid, 1);
+
+                Thickness margin = new Thickness
+                {
+                    Top = 4,
+                    Bottom = 4,
+                    Left = 16,
+                    Right = 16
+                };
+
+                PointsList.Margin = margin;
+                SettingsList.Margin = margin;
+
+                MiscPanel.Orientation = Orientation.Horizontal;
+                ActionsPanel.Orientation = Orientation.Horizontal;
+                MenuGrid.VerticalAlignment = VerticalAlignment.Top;
+                MiscPanel.VerticalAlignment = VerticalAlignment.Center;
+                MiscPanel.HorizontalAlignment = HorizontalAlignment.Right;
+                ActionsPanel.VerticalAlignment = VerticalAlignment.Center;
+                MenuGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
+                ActionsPanel.HorizontalAlignment = HorizontalAlignment.Left;
+            }
+        }
+
+        private void UpdateHoverState(PointEntry? nearest, double minDist, int hoverRadius)
+        {
+            foreach (var p in pointManager.Points)
+            {
+                bool shouldHover = (p == nearest && minDist <= hoverRadius);
+                if (p.IsHovered != shouldHover)
+                {
+                    p.IsHovered = shouldHover;
+                    if (shouldHover)
+                    {
+                        var container = PointsList.ItemContainerGenerator.ContainerFromItem(p) as FrameworkElement;
+                        container?.BringIntoView();
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Overridden Methods
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            isRunning = false;
+            currentMode = "Closed";
+            PointsOverlay.Instance?.Dispose();
+            MouseService.StopListeningToAll();
+            KeyboardService.StopListeningToAll();
+            Application.Current.Shutdown();
+        }
+        #endregion
+
+        #region Save and Load Methods
         private void SaveSetting(string key, string value)
         {
             if (appSettings == null || configuration == null) return;
@@ -966,11 +877,9 @@ namespace PointAC
                 {
                     string rawValue = appSettings[key].Value ?? string.Empty;
 
-                    // Enums
                     if (typeof(T).IsEnum && Enum.TryParse(typeof(T), rawValue, out var enumValue))
                         return (T)enumValue;
 
-                    // Primitives
                     if (typeof(T) == typeof(bool) && bool.TryParse(rawValue, out var boolValue))
                         return (T)(object)boolValue;
 
@@ -1057,308 +966,8 @@ namespace PointAC
                 configuration.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[Config Save Error] {ex.Message}");
-            }
-        }
-
-        private string GetFormattedToggleKey()
-        {
-            return string.Join("+", toggleKey);
-        }
-
-        private static string FormatKeyName(Key key)
-        {
-            if (key >= Key.D0 && key <= Key.D9)
-                return ((int)key - (int)Key.D0).ToString();
-
-            if (key >= Key.NumPad0 && key <= Key.NumPad9)
-                return "Num" + ((int)key - (int)Key.NumPad0);
-
-            return key switch
-            {
-                Key.LeftCtrl or Key.RightCtrl => "Ctrl",
-                Key.LeftShift or Key.RightShift => "Shift",
-                Key.LeftAlt or Key.RightAlt => "Alt",
-                Key.LWin or Key.RWin => "Win",
-
-                >= Key.F1 and <= Key.F24 => key.ToString().ToUpper(),
-
-                Key.Return => "Enter",
-                Key.Back => "Backspace",
-                Key.Delete => "Del",
-                Key.Insert => "Ins",
-                Key.Tab => "Tab",
-                Key.Space => "Space",
-                Key.Escape => "Esc",
-                Key.Capital => "CapsLock",
-
-                Key.Home => "Home",
-                Key.End => "End",
-                Key.PageUp => "PgUp",
-                Key.PageDown => "PgDn",
-                Key.Up => "↑",
-                Key.Down => "↓",
-                Key.Left => "←",
-                Key.Right => "→",
-
-                Key.OemPlus => "Plus",
-                Key.OemMinus => "Minus",
-                Key.OemComma => ",",
-                Key.OemPeriod => ".",
-                Key.Oem1 => ";",
-                Key.Oem2 => "/",
-                Key.Oem3 => "`",
-                Key.Oem4 => "[",
-                Key.Oem5 => "\\",
-                Key.Oem6 => "]",
-                Key.Oem7 => "'",
-
-                Key.Multiply => "Multiply",
-                Key.Divide => "Divide",
-                Key.Subtract => "Subtract",
-                Key.Add => "Add",
-                Key.Decimal => "Decimal",
-
-                _ => key.ToString()
-            };
-        }
-
-        private void SetMenuDock()
-        {
-            if (menuStyle == "Left")
-            {
-                Grid.SetRow(MenuGrid, 1);
-                Grid.SetColumn(MenuGrid, 0);
-
-                ActionsPanel.Orientation = Orientation.Vertical;
-                MiscPanel.Orientation = Orientation.Vertical;
-
-                MenuGrid.VerticalAlignment = VerticalAlignment.Stretch;
-                MenuGrid.HorizontalAlignment = HorizontalAlignment.Left;
-
-                ActionsPanel.HorizontalAlignment = HorizontalAlignment.Center;
-                ActionsPanel.VerticalAlignment = VerticalAlignment.Top;
-
-                MiscPanel.HorizontalAlignment = HorizontalAlignment.Center;
-                MiscPanel.VerticalAlignment = VerticalAlignment.Bottom;
-            }
-            else
-            {
-                Grid.SetRow(MenuGrid, 0);
-                Grid.SetColumn(MenuGrid, 1);
-
-                ActionsPanel.Orientation = Orientation.Horizontal;
-                MiscPanel.Orientation = Orientation.Horizontal;
-
-                MenuGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
-                MenuGrid.VerticalAlignment = VerticalAlignment.Top;
-
-                ActionsPanel.HorizontalAlignment = HorizontalAlignment.Left;
-                ActionsPanel.VerticalAlignment = VerticalAlignment.Center;
-
-                MiscPanel.HorizontalAlignment = HorizontalAlignment.Right;
-                MiscPanel.VerticalAlignment = VerticalAlignment.Center;
-            }
-        }
-
-        private void ApplyLanguage(string language)
-        {
-            try
-            {
-                string targetLanguage = language;
-
-                if (language.Equals("System", StringComparison.OrdinalIgnoreCase))
-                {
-                    string systemLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-
-                    switch (systemLang)
-                    {
-                        case "ar":
-                            targetLanguage = "Arabic";
-                            break;
-                        case "en":
-                            targetLanguage = "English";
-                            break;
-                        default:
-                            targetLanguage = "English";
-                            break;
-                    }
-                }
-
-                string dictPath = $"pack://application:,,,/PointAC;component/Localization/{targetLanguage}.xaml";
-                var newDict = new ResourceDictionary { Source = new Uri(dictPath, UriKind.Absolute) };
-
-                var oldDict = Application.Current.Resources.MergedDictionaries
-                    .FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("/Localization/"));
-                if (oldDict != null)
-                    Application.Current.Resources.MergedDictionaries.Remove(oldDict);
-
-                Application.Current.Resources.MergedDictionaries.Add(newDict);
-
-                if (targetLanguage.Equals("Arabic", StringComparison.OrdinalIgnoreCase))
-                {
-                    this.FlowDirection = FlowDirection.RightToLeft;
-                }
-                else
-                {
-                    this.FlowDirection = FlowDirection.LeftToRight;
-                }
-            }
-            catch
-            {
-                try
-                {
-                    var fallbackDict = new ResourceDictionary
-                    {
-                        Source = new Uri("pack://application:,,,/PointAC;component/Localization/English.xaml", UriKind.Absolute)
-                    };
-
-                    Application.Current.Resources.MergedDictionaries.Add(fallbackDict);
-                    this.FlowDirection = FlowDirection.LeftToRight;
-                }
-                catch { }
-            }
-        }
-
-        private void UpdateHoverState(PointEntry? nearest, double minDist, int hoverRadius)
-        {
-            foreach (var p in pointManager.Points)
-            {
-                bool shouldHover = (p == nearest && minDist <= hoverRadius);
-                if (p.IsHovered != shouldHover)
-                {
-                    p.IsHovered = shouldHover;
-                    if (shouldHover)
-                    {
-                        var container = PointsList.ItemContainerGenerator.ContainerFromItem(p) as FrameworkElement;
-                        container?.BringIntoView();
-                    }
-                }
-            }
-        }
-
-        private bool IsShortcutPressed(KeyEventArgs e, HashSet<Key> shortcut)
-        {
-            bool ctrl = shortcut.Contains(Key.LeftCtrl) || shortcut.Contains(Key.RightCtrl);
-            bool shift = shortcut.Contains(Key.LeftShift) || shortcut.Contains(Key.RightShift);
-            bool alt = shortcut.Contains(Key.LeftAlt) || shortcut.Contains(Key.RightAlt);
-
-            bool ctrlPressed = (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
-            bool shiftPressed = (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
-            bool altPressed = (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt));
-
-            var mainKeys = shortcut.Except(new[] {
-                Key.LeftCtrl, Key.RightCtrl,
-                Key.LeftShift, Key.RightShift,
-                Key.LeftAlt, Key.RightAlt
-            });
-
-            return mainKeys.Contains(e.Key)
-                && (!ctrl || ctrlPressed)
-                && (!shift || shiftPressed)
-                && (!alt || altPressed);
-        }
-
-        private async Task<(UpdateStatus, string)> SafeCheckForUpdatesAsync()
-        {
-            try
-            {
-                var currentVersion = Version.Parse(AppVersion);
-                string versionUrl = "https://raw.githubusercontent.com/xh4l1l/Versions/refs/heads/main/PointAC";
-
-                var (status, latestVersion) = await UpdateChecker.CheckForUpdatesAsync(versionUrl, currentVersion);
-
-                string message = status switch
-                {
-                    UpdateStatus.UpdateAvailable => (string)FindResource("UpdateAvailable"),
-                    UpdateStatus.UpToDate => (string)FindResource("UpdateUpToDate"),
-                    UpdateStatus.CheckFailed => (string)FindResource("UpdateError"),
-                    _ => "Unknown status"
-                };
-
-                return (status, message);
-            }
-            catch
-            {
-                return (UpdateStatus.CheckFailed, (string)FindResource("UpdateError"));
-            }
-        }
-
-
-        private bool IsClickInsideAppWindow(System.Drawing.Point screenPoint)
-        {
-            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-
-            if (GetWindowRect(hwnd, out RECT rect))
-            {
-                bool inside = screenPoint.X >= rect.Left && screenPoint.X <= rect.Right &&
-                              screenPoint.Y >= rect.Top && screenPoint.Y <= rect.Bottom;
-                return inside;
-            }
-
-            return false;
-        }
-
-        private System.Drawing.Rectangle GetElementScreenBounds(FrameworkElement element)
-        {
-            if (!element.IsLoaded)
-                return System.Drawing.Rectangle.Empty;
-
-            var transform = element.TransformToAncestor(this);
-            var topLeft = transform.Transform(new System.Windows.Point(0, 0));
-            var bottomRight = transform.Transform(new System.Windows.Point(element.ActualWidth, element.ActualHeight));
-
-            var screenTopLeft = PointToScreen(topLeft);
-            var screenBottomRight = PointToScreen(bottomRight);
-
-            return System.Drawing.Rectangle.FromLTRB(
-                (int)screenTopLeft.X,
-                (int)screenTopLeft.Y,
-                (int)screenBottomRight.X,
-                (int)screenBottomRight.Y
-            );
-        }
-
-        private static double Distance(Point a, Point b)
-        {
-            int dx = a.X - b.X;
-            int dy = a.Y - b.Y;
-            return Math.Sqrt(dx * dx + dy * dy);
+            catch { }
         }
         #endregion
-
-        #region Overriden Methods
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-            isRunning = false;
-            currentMode = "Closed";
-            D2DOverlay.Instance?.Dispose();
-            MouseHandler.StopListeningToAll();
-            KeyboardHandler.StopListeningToAll();
-            Application.Current.Shutdown();
-        }
-        #endregion
-
-        #region Win32 Interop
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-        #endregion
-
     }
 }

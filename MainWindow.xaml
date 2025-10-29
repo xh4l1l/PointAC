@@ -5,6 +5,10 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PointAC"
+        xmlns:core="clr-namespace:PointAC.Core"
+        xmlns:services="clr-namespace:PointAC.Services"
+        xmlns:management="clr-namespace:PointAC.Management"
+        xmlns:miscellaneous="clr-namespace:PointAC.Miscellaneous"
         mc:Ignorable="d"
         Title="{DynamicResource AppTitle}"
         Height="450"
@@ -23,7 +27,7 @@
         LocationChanged="Window_LocationChanged">
 
     <Window.Resources>
-        <local:IntSafeConverter x:Key="IntSafeConverter" />
+        <miscellaneous:IntSafeConverter x:Key="IntSafeConverter" />
 
         <Style x:Key="HyperlinkStyle"
                TargetType="Hyperlink"
@@ -229,19 +233,19 @@
             </StackPanel>
         </Grid>
 
-        <!-- Settings Container -->
         <Border Name="SettingsContainer"
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="4,0,4,4"
                 CornerRadius="6"
                 Visibility="Collapsed">
 
             <ScrollViewer Name="SettingsScrollViewer"
-                          VerticalScrollBarVisibility="Auto">
+                          VerticalScrollBarVisibility="Auto"
+                          CanContentScroll="False">
 
-                <StackPanel Margin="24"
-                            Orientation="Vertical">
+                <StackPanel Name="SettingsList"
+                            Orientation="Vertical"
+                            VirtualizingStackPanel.IsVirtualizing="True">
 
                     <!-- Settings Title -->
                     <TextBlock Text="{DynamicResource SettingsTitle}"
@@ -336,7 +340,7 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="1"
-                                      SelectionChanged="ClickTypeSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource ClickTypeSingle}"
                                               Tag="Single" />
@@ -383,7 +387,7 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="3"
-                                      SelectionChanged="MouseButtonSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource MouseButtonLeft}"
                                               Tag="Left" />
@@ -491,7 +495,7 @@
                                   MouseEnter="HotkeyRegisterGrid_MouseEnter"
                                   MouseLeave="HotkeyRegisterGrid_MouseLeave">
 
-                                <Rectangle StrokeDashArray="8,8"
+                                <Rectangle StrokeDashArray="12,12"
                                            RadiusX="4"
                                            RadiusY="4"
                                            Height="Auto"
@@ -556,7 +560,7 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="2"
-                                      SelectionChanged="MenuStyleSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource MenuDockTop}"
                                               Tag="Top" />
@@ -603,7 +607,7 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="0"
-                                      SelectionChanged="AlwaysOnTopSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource GeneralOn}"
                                               Tag="True" />
@@ -650,7 +654,7 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="2"
-                                      SelectionChanged="AppThemeSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource ThemeDark}"
                                               Tag="Dark" />
@@ -660,6 +664,59 @@
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource GeneralSystemSetting}"
                                               Tag="System" />
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- App Backdrop -->
+                    <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="&#xEB42;"
+                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,2,12,0" />
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{DynamicResource SettingsAppBackdropTitle}"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{DynamicResource SettingsAppBackdropDescription}"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Style="{StaticResource CaptionTextBlockStyle}"
+                                           Margin="2,4,0,0" />
+                            </StackPanel>
+
+                            <ComboBox Grid.Column="2"
+                                      Name="AppBackdropSelector"
+                                      Width="175"
+                                      VerticalAlignment="Center"
+                                      SelectedIndex="2"
+                                      SelectionChanged="Selector_SelectionChanged">
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource GeneralNone}"
+                                              Tag="None" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource BackdropTypeMica}"
+                                              Tag="Mica" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource BackdropTypeTabbed}"
+                                              Tag="Tabbed" />
+                                <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                              Content="{DynamicResource BackdropTypeAcrylic}"
+                                              Tag="Acrylic" />
                             </ComboBox>
                         </Grid>
                     </Border>
@@ -700,13 +757,13 @@
                                       Width="175"
                                       VerticalAlignment="Center"
                                       SelectedIndex="2"
-                                      SelectionChanged="AppLanguageSelector_SelectionChanged">
+                                      SelectionChanged="Selector_SelectionChanged">
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                              Content="العربية"
-                                              Tag="Arabic" />
+                                              Content="العربية — الفصحى"
+                                              Tag="ar-SA" />
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                              Content="English"
-                                              Tag="English" />
+                                              Content="English — US"
+                                              Tag="en-US" />
                                 <ComboBoxItem Style="{StaticResource ComboBoxItem}"
                                               Content="{DynamicResource GeneralSystemSetting}"
                                               Tag="System" />
@@ -799,21 +856,22 @@
 
                                 <StackPanel Grid.Column="1"
                                             VerticalAlignment="Center">
-                                    <TextBlock Text="{DynamicResource AppName}"
+                                    <TextBlock Text="{DynamicResource AppTitle}"
                                                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                                FontWeight="SemiBold"
                                                FontSize="14" />
-                                    <TextBlock Text="{DynamicResource AppCopyright}"
-                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                               Style="{StaticResource CaptionTextBlockStyle}"
-                                               Margin="0,2,0,0" />
+                                    <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                               Style="{StaticResource CaptionTextBlockStyle}">
+    <Run Text="{DynamicResource SettingsAboutDescription}" />
+    <Run Text="{DynamicResource AppAuthor}" />
+                                    </TextBlock>
                                 </StackPanel>
 
                                 <TextBlock Grid.Column="2"
                                            VerticalAlignment="Center"
                                            Style="{StaticResource CaptionTextBlockStyle}"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                           Text="{x:Static local:MainWindow.AppVersion}"
+                                           Text="{DynamicResource AppVersion}"
                                            Margin="0,0,8,0"
                                            Opacity="0.7" />
                             </Grid>
@@ -867,7 +925,6 @@
         <Border Name="PointsContainer"
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="4,0,4,4"
                 CornerRadius="6">
 
             <ScrollViewer Name="PointsScrollViewer"
@@ -876,7 +933,6 @@
 
                 <DockPanel LastChildFill="True">
                     <ItemsControl Name="PointsList"
-                                  Margin="8,0"
                                   VerticalContentAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch">
 
@@ -891,7 +947,7 @@
                                 <Setter Property="HorizontalAlignment"
                                         Value="Stretch" />
                                 <Setter Property="Margin"
-                                        Value="8,4" />
+                                        Value="0,4" />
                             </Style>
                         </ItemsControl.ItemContainerStyle>
 
@@ -927,11 +983,11 @@
                         </ItemsControl.Style>
 
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type local:PointEntry}">
+                            <DataTemplate DataType="{x:Type core:PointEntry}">
                                 <Grid>
                                     <Border Background="{DynamicResource ControlFillColorSecondaryBrush}"
                                             BorderBrush="{DynamicResource ControlStrokeColorSecondaryBrush}"
-                                            Padding="4"
+                                            Padding="8,8"
                                             CornerRadius="4"
                                             BorderThickness="1"
                                             SnapsToDevicePixels="True"
@@ -962,7 +1018,7 @@
                                                     </DataTrigger>
 
                                                     <DataTrigger Binding="{Binding IsRuntimeLocked}"
-                                                                 Value="True">
+                                                                 Value="False">
                                                         <Setter Property="Opacity"
                                                                 Value="1" />
                                                     </DataTrigger>
@@ -970,265 +1026,281 @@
                                             </Style>
                                         </Border.Style>
 
-                                        <!-- Your full existing StackPanel content -->
                                         <StackPanel FlowDirection="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=FlowDirection}"
                                                     VerticalAlignment="Center">
-                                            <!-- Order -->
-                                            <StackPanel Orientation="Horizontal"
-                                                        Margin="0,0,0,8">
-                                                <Viewbox Width="16"
-                                                         Height="16"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,4,0">
-                                                    <TextBlock Text="&#xE8FD;"
-                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                                </Viewbox>
 
-                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                                                           Style="{StaticResource CaptionTextBlockStyle}"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.Text>
-                                                        <MultiBinding StringFormat="{}{1}: {0}">
-                                                            <Binding Path="Order" />
-                                                            <Binding Source="{StaticResource PointOrderLabel}" />
-                                                        </MultiBinding>
-                                                    </TextBlock.Text>
-                                                </TextBlock>
+                                            <StackPanel>
+                                                <!-- Order -->
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left">
+                                                    <Viewbox Width="16"
+                                                             Height="16"
+                                                             VerticalAlignment="Center">
+                                                        <TextBlock Text="&#xE8FD;"
+                                                                   FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                   VerticalAlignment="Center"
+                                                                   TextAlignment="Center" />
+                                                    </Viewbox>
+
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                               Style="{StaticResource CaptionTextBlockStyle}">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{1}: {0}">
+                                                                <Binding Path="Order" />
+                                                                <Binding Source="{StaticResource PointOrderLabel}" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <!-- Position -->
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left"
+                                                            Margin="0,4,0,8">
+                                                    <Viewbox Width="16"
+                                                             Height="16"
+                                                             VerticalAlignment="Center">
+                                                        <TextBlock Text="&#xE707;"
+                                                                   FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                   VerticalAlignment="Center"
+                                                                   TextAlignment="Center" />
+                                                    </Viewbox>
+
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                               Style="{StaticResource CaptionTextBlockStyle}">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0}: {1}={2}, {3}={4}">
+                                                                <Binding Source="{StaticResource PointPositionLabel}" />
+                                                                <Binding Source="{StaticResource PointPositionXLabel}" />
+                                                                <Binding Path="Position.X" />
+                                                                <Binding Source="{StaticResource PointPositionYLabel}" />
+                                                                <Binding Path="Position.Y" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <!-- Duration -->
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left">
+                                                    <Viewbox Width="16"
+                                                             Height="16"
+                                                             VerticalAlignment="Center">
+                                                        <TextBlock Text="&#xE917;"
+                                                                   FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                                   VerticalAlignment="Center"
+                                                                   TextAlignment="Center" />
+                                                    </Viewbox>
+
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                               Style="{StaticResource CaptionTextBlockStyle}">
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{1}: {0} {2}">
+                                                                <Binding Path="Duration" />
+                                                                <Binding Source="{StaticResource PointDurationLabel}" />
+                                                                <Binding Source="{StaticResource GeneralMillisecondLabel}" />
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
                                             </StackPanel>
+                                            
 
-                                            <!-- Position -->
-                                            <StackPanel Orientation="Horizontal"
-                                                        Margin="0,0,0,8">
-                                                <Viewbox Width="16"
-                                                         Height="16"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,6,0">
-                                                    <TextBlock Text="&#xE707;"
-                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                                </Viewbox>
+                                            <Separator Margin="2,4" />
 
-                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                                                           Style="{StaticResource CaptionTextBlockStyle}"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.Text>
-                                                        <MultiBinding StringFormat="{}{0}: {1}={2}, {3}={4}">
-                                                            <Binding Source="{StaticResource PointPositionLabel}" />
-                                                            <Binding Source="{StaticResource PointPositionXLabel}" />
-                                                            <Binding Path="Position.X" />
-                                                            <Binding Source="{StaticResource PointPositionYLabel}" />
-                                                            <Binding Path="Position.Y" />
-                                                        </MultiBinding>
-                                                    </TextBlock.Text>
-                                                </TextBlock>
-                                            </StackPanel>
-
-                                            <!-- Duration -->
-                                            <StackPanel Orientation="Horizontal"
-                                                        Margin="0,0,0,6">
-                                                <Viewbox Width="16"
-                                                         Height="16"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,4,0">
-                                                    <TextBlock Text="&#xE917;"
-                                                               FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                                </Viewbox>
-
-                                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                                                           Style="{StaticResource CaptionTextBlockStyle}"
-                                                           VerticalAlignment="Center">
-                                                    <TextBlock.Text>
-                                                        <MultiBinding StringFormat="{}{1}: {0} {2}">
-                                                            <Binding Path="Duration" />
-                                                            <Binding Source="{StaticResource PointDurationLabel}" />
-                                                            <Binding Source="{StaticResource GeneralMillisecondLabel}" />
-                                                        </MultiBinding>
-                                                    </TextBlock.Text>
-                                                </TextBlock>
-                                            </StackPanel>
-
-                                            <!-- Shared size scope for input fields -->
+                                            <!-- Point Editor -->
                                             <StackPanel Grid.IsSharedSizeScope="False"
                                                         VerticalAlignment="Stretch"
                                                         HorizontalAlignment="Stretch">
 
-                                                <!-- Duration -->
-                                                <Grid Margin="0,0,0,8"
-                                                      HorizontalAlignment="Stretch">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="28" />
-                                                        <!-- icon -->
-                                                        <ColumnDefinition Width="*" />
-                                                        <!-- full stretch -->
-                                                    </Grid.ColumnDefinitions>
+                                                <!-- TextBoxes -->
+                                                <StackPanel>
+                                                    <!-- Duration -->
+                                                    <Grid Margin="0,0,0,4"
+                                                          HorizontalAlignment="Stretch">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
 
-                                                    <Viewbox Width="18"
-                                                             Height="18"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Center"
-                                                             Margin="0,0,8,0">
-                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                                                   Text="&#xE823;" />
-                                                    </Viewbox>
+                                                        <Viewbox Width="16"
+                                                                 Height="16"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Center"
+                                                                 Margin="0,0,8,0">
+                                                            <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                                       Text="&#xE823;" />
+                                                        </Viewbox>
 
-                                                    <TextBox Grid.Column="1"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Stretch"
-                                                             Margin="0"
-                                                             Padding="6,2"
-                                                             Text="{Binding Duration, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                             Tag="DurationTextBox"
-                                                             LostFocus="IntegerBox_LostFocus"
-                                                             PreviewTextInput="IntegerBox_PreviewTextInput"
-                                                             KeyDown="IntegerBox_KeyDown" />
-                                                </Grid>
+                                                        <TextBox Grid.Column="1"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Stretch"
+                                                                 Margin="4,0,0,0"
+                                                                 Text="{Binding Duration, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                 Tag="DurationTextBox"
+                                                                 LostFocus="IntegerBox_LostFocus"
+                                                                 PreviewTextInput="IntegerBox_PreviewTextInput"
+                                                                 KeyDown="IntegerBox_KeyDown" />
+                                                    </Grid>
 
-                                                <!-- Order -->
-                                                <Grid Margin="0,0,0,8"
-                                                      HorizontalAlignment="Stretch">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="28" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
+                                                    <!-- Order -->
+                                                    <Grid Margin="0,0,0,4"
+                                                          HorizontalAlignment="Stretch">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
 
-                                                    <Viewbox Width="18"
-                                                             Height="18"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Center"
-                                                             Margin="0,0,8,0">
-                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                                                   Text="&#xE8FD;" />
-                                                    </Viewbox>
+                                                        <Viewbox Width="16"
+                                                                 Height="16"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Center"
+                                                                 Margin="0,0,8,0">
+                                                            <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                                       Text="&#xE8FD;" />
+                                                        </Viewbox>
 
-                                                    <TextBox Grid.Column="1"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Stretch"
-                                                             Margin="0"
-                                                             Padding="6,2"
-                                                             Text="{Binding Order, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                             Tag="OrderTextBox"
-                                                             PreviewTextInput="IntegerBox_PreviewTextInput"
-                                                             KeyDown="IntegerBox_KeyDown" />
-                                                </Grid>
+                                                        <TextBox Grid.Column="1"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Stretch"
+                                                                 Margin="4,0,0,0"
+                                                                 Text="{Binding Order, Converter={StaticResource IntSafeConverter}, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                 Tag="OrderTextBox"
+                                                                 PreviewTextInput="IntegerBox_PreviewTextInput"
+                                                                 KeyDown="IntegerBox_KeyDown" />
+                                                    </Grid>
+                                                </StackPanel>                                                
 
-                                                <!-- Click Type -->
-                                                <Grid Margin="0,0,0,8"
-                                                      HorizontalAlignment="Stretch">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="28" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
+                                                <Separator Margin="2,4" />
 
-                                                    <Viewbox Width="18"
-                                                             Height="18"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Center"
-                                                             Margin="0,0,8,0">
-                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Text"
-                                                                            Value="&#xE8B0;" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding ClickTypeString}"
-                                                                                     Value="Double">
-                                                                            <Setter Property="Text"
-                                                                                    Value="&#xE7C9;" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </Viewbox>
+                                                <!-- ComboBoxes -->
+                                                <StackPanel>
+                                                    <!-- Click Type -->
+                                                    <Grid Margin="0,0,0,4"
+                                                          HorizontalAlignment="Stretch">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
 
-                                                    <ComboBox Grid.Column="1"
-                                                              VerticalAlignment="Center"
-                                                              HorizontalAlignment="Stretch"
-                                                              Margin="0"
-                                                              Padding="4,2"
-                                                              SelectedValue="{Binding ClickTypeString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                              SelectedValuePath="Tag">
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource ClickTypeSingle}"
-                                                                      Tag="Single" />
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource ClickTypeDouble}"
-                                                                      Tag="Double" />
-                                                    </ComboBox>
-                                                </Grid>
+                                                        <Viewbox Width="16"
+                                                                 Height="16"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Center"
+                                                                 Margin="0,0,8,0">
+                                                            <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text"
+                                                                                Value="&#xE8B0;" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ClickTypeString}"
+                                                                                         Value="Double">
+                                                                                <Setter Property="Text"
+                                                                                        Value="&#xE7C9;" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Viewbox>
 
-                                                <!-- Mouse Button -->
-                                                <Grid Margin="0,0,0,8"
-                                                      HorizontalAlignment="Stretch">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="28" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
+                                                        <ComboBox Grid.Column="1"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  Margin="4,0,0,0"
+                                                                  SelectedValue="{Binding ClickTypeString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                  SelectedValuePath="Tag">
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource ClickTypeSingle}"
+                                                                          Tag="Single" />
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource ClickTypeDouble}"
+                                                                          Tag="Double" />
+                                                        </ComboBox>
+                                                    </Grid>
 
-                                                    <Viewbox Width="18"
-                                                             Height="18"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Center"
-                                                             Margin="0,0,8,0">
-                                                        <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Text"
-                                                                            Value="&#xE962;" />
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding ButtonString}"
-                                                                                     Value="Left">
-                                                                            <Setter Property="Text"
-                                                                                    Value="&#xE8E4;" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding ButtonString}"
-                                                                                     Value="Right">
-                                                                            <Setter Property="Text"
-                                                                                    Value="&#xE8E2;" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding ButtonString}"
-                                                                                     Value="Middle">
-                                                                            <Setter Property="Text"
-                                                                                    Value="&#xE8E3;" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger Binding="{Binding ButtonString}"
-                                                                                     Value="System">
-                                                                            <Setter Property="Text"
-                                                                                    Value="&#xE770;" />
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </Viewbox>
+                                                    <!-- Mouse Button -->
+                                                    <Grid HorizontalAlignment="Stretch">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
 
-                                                    <ComboBox Grid.Column="1"
-                                                              VerticalAlignment="Center"
-                                                              HorizontalAlignment="Stretch"
-                                                              Margin="0"
-                                                              Padding="4,2"
-                                                              SelectedValue="{Binding ButtonString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                              SelectedValuePath="Tag">
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource MouseButtonLeft}"
-                                                                      Tag="Left" />
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource MouseButtonRight}"
-                                                                      Tag="Right" />
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource MouseButtonMiddle}"
-                                                                      Tag="Middle" />
-                                                        <ComboBoxItem Style="{StaticResource ComboBoxItem}"
-                                                                      Content="{DynamicResource GeneralSystemSetting}"
-                                                                      Tag="Default" />
-                                                    </ComboBox>
-                                                </Grid>
+                                                        <Viewbox Width="16"
+                                                                 Height="16"
+                                                                 VerticalAlignment="Center"
+                                                                 HorizontalAlignment="Center"
+                                                                 Margin="0,0,8,0">
+                                                            <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text"
+                                                                                Value="&#xE962;" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding ButtonString}"
+                                                                                         Value="Left">
+                                                                                <Setter Property="Text"
+                                                                                        Value="&#xE8E4;" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ButtonString}"
+                                                                                         Value="Right">
+                                                                                <Setter Property="Text"
+                                                                                        Value="&#xE8E2;" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ButtonString}"
+                                                                                         Value="Middle">
+                                                                                <Setter Property="Text"
+                                                                                        Value="&#xE8E3;" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding ButtonString}"
+                                                                                         Value="System">
+                                                                                <Setter Property="Text"
+                                                                                        Value="&#xE770;" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Viewbox>
+
+                                                        <ComboBox Grid.Column="1"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Stretch"
+                                                                  Margin="4,0,0,0"
+                                                                  SelectedValue="{Binding ButtonString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                  SelectedValuePath="Tag">
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource MouseButtonLeft}"
+                                                                          Tag="Left" />
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource MouseButtonRight}"
+                                                                          Tag="Right" />
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource MouseButtonMiddle}"
+                                                                          Tag="Middle" />
+                                                            <ComboBoxItem Style="{StaticResource ComboBoxItem}"
+                                                                          Content="{DynamicResource GeneralSystemSetting}"
+                                                                          Tag="Default" />
+                                                        </ComboBox>
+                                                    </Grid>
+                                                </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
